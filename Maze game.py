@@ -1,67 +1,178 @@
-import pygame
-import random
-import sys
+import turtle
 
-pygame.init()
+# Set up the screen
+win = turtle.Screen()
+win.bgpic("dungeon_bg.gif")
+win.title("Infinite Maze")
+win.setup(700, 700)
+win.register_shape("wall.img.gif")
+win.register_shape("door.maze.gif")
+win.register_shape("Standing.gif") 
+win.register_shape("Left.gif")  
+win.register_shape("Right.gif") 
 
-WIDTH, HEIGHT = 950, 650
+# Register monster frames as PNG images
+win.register_shape("Monster1.5.gif")
+win.register_shape("Monster2.5.gif")
+win.register_shape("Monster3.5.gif")
+win.register_shape("Monster4.5.gif")
+win.register_shape("Monster5.5.gif")
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
+# Pen class to draw the walls and door
+class Pen(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("wall.img.gif")
+        self.color("white")
+        self.penup()
+        self.speed(0)
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Maze Game")
+# Player class with integrated movement methods
+class Player(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("Standing.gif")  # Set the initial image to standing
+        self.color("green")
+        self.penup()
+        self.speed(0)
+        self.goto(-264, 264)  # Adjusted to start inside the maze
 
-ROWS, COLS = 17, 25
-TILE_WIDTH = WIDTH // COLS
-TILE_HEIGHT = HEIGHT // ROWS
+    # Define movement methods
+    def move_up(self):
+        self.shape("Standing.gif")  # Change to standing image
+        new_x = self.xcor()
+        new_y = self.ycor() + 24
+        if (new_x, new_y) not in walls:  # Prevent moving into walls
+            self.goto(new_x, new_y)
+            self.check_if_at_door()
 
-WALL_THICKNESS = min(TILE_WIDTH, TILE_HEIGHT) // 4
+    def move_down(self):
+        self.shape("Standing.gif")  # Change to standing image
+        new_x = self.xcor()
+        new_y = self.ycor() - 24
+        if (new_x, new_y) not in walls:  # Prevent moving into walls
+            self.goto(new_x, new_y)
+            self.check_if_at_door()
 
-# Load the wall image and scale it to fit the tile size
-wall_image = pygame.image.load('wall.png')  # Replace 'wall.png' with your image file name
-wall_image = pygame.transform.scale(wall_image, (TILE_WIDTH - 2 * WALL_THICKNESS, TILE_HEIGHT - 2 * WALL_THICKNESS))
+    def move_left(self):
+        self.shape("Left.gif")  # Change to left-moving image
+        new_x = self.xcor() - 24
+        new_y = self.ycor()
+        if (new_x, new_y) not in walls:  # Prevent moving into walls
+            self.goto(new_x, new_y)
+            self.check_if_at_door()
 
-# Function to create a maze using DFS with backtracking
-def generate_maze(rows, cols):
-    maze = [[1 for _ in range(cols)] for _ in range(rows)]
-    start_x, start_y = 0, 0
-    maze[start_y][start_x] = 0
+    def move_right(self):
+        self.shape("Right.gif")  # Change to right-moving image
+        new_x = self.xcor() + 24
+        new_y = self.ycor()
+        if (new_x, new_y) not in walls:  # Prevent moving into walls
+            self.goto(new_x, new_y)
+            self.check_if_at_door()
 
-    def carve_passages(cx, cy):
-        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        random.shuffle(directions)
-        for direction in directions:
-            nx, ny = cx + direction[0] * 2, cy + direction[1] * 2
-            if 0 <= ny < rows and 0 <= nx < cols and maze[ny][nx] == 1:
-                maze[cy + direction[1]][cx + direction[0]] = 0
-                maze[ny][nx] = 0
-                carve_passages(nx, ny)
+    def check_if_at_door(self):
+        if (self.xcor(), self.ycor()) == door_position:
+            print("You've reached the door! Game Over.")
+            turtle.bye()
 
-    carve_passages(start_x, start_y)
+# Monster class for PNG animation
+class Monster(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.frames = ["Monster1.5.gif", "Monster2.5.gif", "Monster3.5.gif", "Monster4.5.gif", "Monster5.5.gif"]
+        self.frame_index = 0
+        self.shape(self.frames[self.frame_index])
+        self.penup()
+        self.speed(0)
+        self.goto(250, -310)  # Place the monster somewhere in the maze
 
-    return maze
+    def animate(self):
+        self.frame_index = (self.frame_index + 1) % len(self.frames)
+        self.shape(self.frames[self.frame_index])
+        turtle.ontimer(self.animate, 200)  # Adjust the timer as needed for your animation speed
 
-# Generate a random maze
-maze = generate_maze(ROWS, COLS)
+# Define the level layout
+levels = [""]
 
-# Function to draw the maze
-def draw_maze():
-    for y, row in enumerate(maze):
-        for x, tile in enumerate(row):
-            rect = pygame.Rect(x * TILE_WIDTH + WALL_THICKNESS, y * TILE_HEIGHT + WALL_THICKNESS, TILE_WIDTH - 2 * WALL_THICKNESS, TILE_HEIGHT - 2 * WALL_THICKNESS)
-            if tile == 1:
-                # Draw the wall image instead of a black rectangle
-                screen.blit(wall_image, rect)
+level_1 = [
+    "XXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XP  XXXXXXX          XXXXX",
+    "X  XXXXXXX  XXXXXX  XXXXX",
+    "X       XX  XXXXXX  XXXXX",
+    "X       XX  XXX        XX",
+    "XXXXXX  XX  XXX        XX",
+    "XXXXXX  XX  XXXXXX  XXXXX",
+    "XXXXXX  XX    XXXX  XXXXX",
+    "X  XXX        XXXX  XXXXX",
+    "X  XXX  XXXXXXXXXXXXXXXXX",
+    "X         XXXXXXXXXXXXXXX",
+    "X                XXXXXXXX",
+    "XXXXXXXXXX       XXXXX  X",
+    "XXXXXXXXXXXXX    XXXXX  X",
+    "XXX  XXXXXXXX           X",
+    "XXX                     X",
+    "XXX          XXXXXXXXXXXX",
+    "XXXXXXXXXX   XXXXXXXXXXXX",
+    "XXXXXXXXXX              X",
+    "XX    XXXX              X",
+    "XX    XXXXXXXXXXXX   XXXX",
+    "X             XXXX   XXXX",      
+    "X                    XXXX",
+    "XXXXXXXXXXXXXX  XX   XXXX",
+    "XXXXXXXXXXXXXXXXXXXX   XX",
+    "XXXXXXXXXXXXXXXXXXXXX   D"
+]
 
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+levels.append(level_1)
 
-    screen.fill(WHITE)
-    
-    draw_maze()
+# Function to set up the maze
+def setup_maze(level):
+    global door_position
 
-    pygame.display.flip()
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            character = level[y][x]
+
+            screen_x = -288 + (x * 24)
+            screen_y = 288 - (y * 24)
+
+            if character == "X":
+                pen.goto(screen_x, screen_y)
+                pen.shape("wall.img.gif")
+                pen.stamp()
+                walls.append((screen_x, screen_y))
+
+            if character == "P":
+                player.goto(screen_x, screen_y)
+
+            if character == "D":
+                pen.goto(screen_x, screen_y)
+                pen.shape("door.maze.gif")  
+                pen.stamp()
+                door_position = (screen_x, screen_y)
+
+# Create instances of the Pen, Player, and Monster classes
+pen = Pen()
+player = Player()
+monster = Monster()
+
+# Lists to hold the walls and door position
+walls = []
+door_position = None
+
+# Set up the maze based on the level layout
+setup_maze(levels[1])
+print(walls)
+
+# Keyboard bindings for player movement
+turtle.listen()
+turtle.onkey(player.move_left, "Left")
+turtle.onkey(player.move_right, "Right")
+turtle.onkey(player.move_up, "Up")
+turtle.onkey(player.move_down, "Down")
+
+# Start the monster animation
+monster.animate()
+
+# Start the game loop
+turtle.done()
