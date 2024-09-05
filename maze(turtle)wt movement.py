@@ -138,7 +138,7 @@ powerups = []
 
 #  level layout on the screen
 def setup_maze(level):
-    wn.tracer(0)  # Disable screen updates
+    wn.tracer(0)  # turn off screen updates
     for y in range(len(level)):
         for x in range(len(level[y])):
             character = level[y][x]
@@ -170,23 +170,23 @@ def setup_maze(level):
     wn.update()  # Update the screen with all the drawings at once
 def interact_obstacles():
     for obstacle in obstacles:
-        if player.distance(obstacle) < 10:
-            player.goto(-320, 320)  # Reset player position on collision
+        if player.distance(obstacle) < 10: #if close it becomes true
+            player.goto(-320, 320)  # starting point .Reset player position on collision
             #print("You hit an obstacle! Try again.")
 
 # Function to collect power-ups
 def collect_powerups():
     for powerup in powerups:
         if player.distance(powerup) < 10:
-            powerup.hideturtle()
-            powerups.remove(powerup)
+            powerup.hideturtle() #hide poweruup
+            powerups.remove(powerup) # remove from powerup list
             if powerup.power_type == "fire":
                 player.fire_power += 1
             elif powerup.power_type == "shield":
                 player.shield += 1
             elif powerup.power_type == "life":
                 player.life += 1
-            player.update_status()
+            player.update_status() # update status bar
             print(f"{powerup.power_type.capitalize()} power-up collected!")
 
 # Create instances of the classes
