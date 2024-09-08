@@ -72,6 +72,11 @@ start_button = Button(475, 420, button_surface, "START")
 exit_button = Button(475, 500, button_surface, "EXIT")
 back_button = Button(475, 540, button_surface, "Back")
 
+exit_button_inthegame = Button(160, 550, button_surface, "EXIT")
+restart_game = Button(475, 500, button_surface, "Restart")
+resume_game  = Button(475, 200, button_surface, "Resume")
+
+
 menu_button_surface = pygame.image.load("menu_button.png")
 menu_button_surface = pygame.transform.scale(menu_button_surface, (40, 40)) 
 menu_button = Button(screen_w - 50, 600, menu_button_surface)
@@ -95,22 +100,22 @@ MAIN_MENU = "main_menu"
 INTRO = "intro"
 GAME = "game"
 Menu = "Options"
+inthegame = "menu_inthegame"
 QUIT = "quit"
 
 current_state = MAIN_MENU
-video_played = False  # Flag to check if video has been played
+video_played = False 
 
 def intro():
     global video_played
 
-    # Stop the game music
     pygame.mixer.music.pause()
 
     VID = Video("StoryTelling.mp4")
     VID.set_size((950, 650))
     VID.restart()
 
-    skip_key = pygame.K_RIGHT  # Key used to skip the video
+    skip_key = pygame.K_RIGHT  
 
     while VID.active:
         VID.draw(screen, (0, 0))
@@ -181,6 +186,47 @@ def menu():
     back_button.update()
     back_button.change_color(pygame.mouse.get_pos())
 
+def menu_inthegame():
+    screen.fill((52, 78, 91))
+    background_maze(menu_background)
+
+    instruction_text = [
+        "INSTRUCTIONS:",
+        "Use Arrow Keys to move the player",
+        "Press SPACE to jump",
+        "Press Right Arrow to skip the video",
+        "Objective: Defeat the monsters & escape the maze",
+    ]
+    for i, line in enumerate(instruction_text):
+        text_surface = font.render(line, True, (255, 255, 0))
+        screen.blit(text_surface, (screen_w // 2 - text_surface.get_width() // 2, 225 + i * 45))
+
+    volume_label = font.render("Volume:", True, (255, 255, 255))
+    screen.blit(volume_label, (250, 100))
+
+    pygame.draw.rect(screen, slider_bg_color, slider_rect)
+    pygame.draw.rect(screen, slider_border_color, slider_rect, slider_border_width)
+    handle_rect.x = slider_rect.x + int(volume * (slider_rect.width - handle_rect.width))
+    pygame.draw.rect(screen, slider_handle_color, handle_rect)
+
+    pygame.draw.rect(screen, toggle_border_color, toggle_rect)
+    pygame.draw.rect(screen, toggle_on_color if sound_effects_enabled else toggle_off_color, toggle_rect.inflate(-4, -4))
+    handle_x = toggle_rect.left + (toggle_width - toggle_height) if sound_effects_enabled else toggle_rect.left
+    pygame.draw.rect(screen, toggle_handle_color, pygame.Rect(handle_x, toggle_rect.top, toggle_height, toggle_height))
+
+    toggle_text = "Sound ON :" if sound_effects_enabled else "Sound OFF :"
+    text_surface = font.render(toggle_text, True, (255, 255, 255))
+    screen.blit(text_surface, (250, 125 + toggle_height + 10))
+
+    exit_button_inthegame.update()
+    exit_button_inthegame.change_color(pygame.mouse.get_pos())
+
+    restart_game.update()
+    restart_game.change_color(pygame.mouse.get_pos())
+
+    resume_game.update()
+    resume_game.change_color(pygame.mouse.get_pos())
+
 def game_screen():
     screen.fill((52, 78, 91))
     game_text = font.render("Game Screen", True, "white")
@@ -217,10 +263,25 @@ while run:
                 if back_button.check_for_input(pygame.mouse.get_pos()):
                     current_state = previous_state
 
+            elif current_state == inthegame:
+                if slider_rect.collidepoint(pygame.mouse.get_pos()):
+                    volume = (pygame.mouse.get_pos()[0] - slider_rect.left)/ slider_rect.width
+                    volume = min(max(volume, 0.0), 1.0)
+                    set_volume(volume)
+
+                if toggle_rect.collidepoint(pygame.mouse.get_pos()):
+                    sound_effects_enabled = not sound_effects_enabled
+
+                if exit_button_inthegame.check_for_input(pygame.mouse.get_pos()):
+                    run = False
+
+                if resume_game.check_for_input(pygame.mouse.get_pos()):
+                    current_state = GAME
+
             elif current_state == GAME:
                 if menu_button.check_for_input(pygame.mouse.get_pos()):
                     previous_state = GAME
-                    current_state = Menu
+                    current_state = inthegame
 
     if current_state == MAIN_MENU:
         main_menu()
@@ -229,6 +290,8 @@ while run:
         current_state = next_state
     elif current_state == Menu:
         menu()
+    elif current_state == inthegame:
+        menu_inthegame()
     elif current_state == GAME:
         game_screen()
 
