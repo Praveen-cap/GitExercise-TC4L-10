@@ -7,7 +7,7 @@ from puzzle import PuzzleGame
 pygame.mixer.init()
 
 
-pygame.mixer.music.load("background_music.mp3")  # Use your music file path here
+pygame.mixer.music.load("background_music.mp3") 
 pygame.mixer.music.play(-1)
 
 win = turtle.Screen()

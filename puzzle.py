@@ -3,6 +3,7 @@ import random
 
 class PuzzleGame:
     def __init__(self, image_path):
+
         pygame.init()
 
     
@@ -23,16 +24,40 @@ class PuzzleGame:
         self.ROWS, self.COLS = 4, 4
 
         
+        # Initialize pygame
+        pygame.init()
+
+        # Window settings
+        self.WIN_WIDTH, self.WIN_HEIGHT = 700, 700
+        self.win = pygame.display.set_mode((self.WIN_WIDTH, self.WIN_HEIGHT))
+        pygame.display.set_caption('Rotation Puzzle')
+
+        # Colors
+        self.WHITE = (255, 255, 255)
+        self.GREEN = (0, 255, 0)
+
+        # Load and resize the image
+        self.image = pygame.image.load(image_path)
+        self.image = pygame.transform.scale(self.image, (self.WIN_WIDTH, self.WIN_HEIGHT))
+
+        # Puzzle settings
+        self.TILE_SIZE = self.WIN_WIDTH // 4  # 4x4 puzzle
+        self.ROWS, self.COLS = 4, 4
+
+        # Initialize tiles and rotations
         self.tiles = []
         self.rotations = []
         self.create_tiles()
 
+
         
+
+        # Randomly rotate each tile
+
         self.randomize_rotations()
 
     def create_tiles(self):
         """Splits the image into tiles and initializes rotations."""
-        
         scale_factor = 2  # 2 because it's adjusted to half of the original size of the dragon picture
         tile_width = self.TILE_SIZE // scale_factor
         tile_height = self.TILE_SIZE // scale_factor
@@ -43,6 +68,14 @@ class PuzzleGame:
                 tile = pygame.transform.scale(self.image.subsurface(col * self.TILE_SIZE, row * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE),(self.TILE_SIZE, self.TILE_SIZE))
                 row_tiles.append(tile)
                 self.rotations.append(0)  
+
+        for row in range(self.ROWS):
+            row_tiles = []
+            for col in range(self.COLS):
+                tile = self.image.subsurface(col * self.TILE_SIZE, row * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
+                row_tiles.append(tile)
+                self.rotations.append(0)  # No rotation initially
+
             self.tiles.append(row_tiles)
 
     def randomize_rotations(self):
@@ -102,5 +135,10 @@ class PuzzleGame:
 
 
 if __name__ == "__main__":
+
     game = PuzzleGame("dragon vettai ku whistle podu .jpg")  # Replace with your image path
     game.main()
+
+    game = PuzzleGame('dragon vettai ku whistle podu .jpg')  # Replace with your image path
+    game.main()
+
