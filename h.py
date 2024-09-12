@@ -13,6 +13,7 @@ font = pygame.font.Font("VT323-Regular.ttf", 40)
 
 image = pygame.image.load('Main_bckgrd.png')
 menu_background = pygame.image.load('Menu_bckgd.png')
+level_select_background = pygame.image.load('Main_Bckgrd.png')
 
 pygame.mixer.music.load('battle-of-the-dragons-8037.mp3')
 pygame.mixer.music.play(-1)
@@ -65,6 +66,11 @@ class Button:
             if self.text:
                 self.text = font.render(self.text_input, True, "black")
 
+class LevelButton(Button):
+    def __init__(self, x, y, level_number):
+        super().__init__(x, y, level_button_image, f"Level {level_number}")
+        self.level_number = level_number
+
 button_surface = pygame.image.load("iButton.png")
 button_surface = pygame.transform.scale(button_surface, (180, 70))
 
@@ -95,18 +101,32 @@ toggle_on_color = (0, 255, 0)
 toggle_off_color = (255, 0, 0)
 toggle_handle_color = (255, 255, 255)
 
-# Load images for toggle ON and OFF states
 toggle_on_image = pygame.image.load("on.png")  # Replace with the actual image path
 toggle_off_image = pygame.image.load("off.png")  # Replace with the actual image path
-
-# Rescale the images to fit the toggle size
 toggle_on_image = pygame.transform.scale(toggle_on_image, (toggle_width, toggle_height))
 toggle_off_image = pygame.transform.scale(toggle_off_image, (toggle_width, toggle_height))
+
+# Load level button image
+level_button_image = pygame.image.load('iButton.png')
+level_button_image = pygame.transform.scale(level_button_image, (100, 100))
+
+# List of level images
+levels = [pygame.image.load(f"Main_Bckgrd.png") for i in range(1, 5)]
+current_level = 0  # Start at level 0
+
+# Create level buttons
+level_buttons = [
+    LevelButton(200, 200, 1),
+    LevelButton(400, 200, 2),
+    LevelButton(200, 400, 3),
+    LevelButton(400, 400, 4)
+]
 
 MAIN_MENU = "main_menu"
 INTRO = "intro"
 GAME = "game"
 Menu = "Options"
+LEVEL_SELECTION = "level_selection"
 inthegame = "menu_inthegame"
 QUIT = "quit"
 
@@ -157,6 +177,14 @@ def main_menu():
 
     menu_button.update()
     menu_button.change_color(pygame.mouse.get_pos())
+
+def level_selection_screen():
+    screen.fill((52, 78, 91))
+    screen.blit(level_select_background, (0, 0))
+
+    for button in level_buttons:
+        button.update()
+        button.change_color(pygame.mouse.get_pos())
 
 def menu():
     screen.fill((52, 78, 91))
@@ -215,7 +243,6 @@ def menu_inthegame():
     handle_rect.x = slider_rect.x + int(volume * (slider_rect.width - handle_rect.width))
     pygame.draw.rect(screen, slider_handle_color, handle_rect)
 
-    # Draw the toggle image based on the sound effect status
     toggle_image = toggle_on_image if sound_effects_enabled else toggle_off_image
     screen.blit(toggle_image, (toggle_rect.x, toggle_rect.y))
 
@@ -226,34 +253,86 @@ def menu_inthegame():
     exit_button_inthegame.update()
     exit_button_inthegame.change_color(pygame.mouse.get_pos())
 
-    restart_game.update()
-    restart_game.change_color(pygame.mouse.get_pos())
-
     resume_game.update()
     resume_game.change_color(pygame.mouse.get_pos())
 
+    restart_game.update()
+    restart_game.change_color(pygame.mouse.get_pos())
+
 def game_screen():
-    screen.fill((52, 78, 91))
-    game_text = font.render("Game Screen", True, "white")
-    screen.blit(game_text, (screen_w // 2 - game_text.get_width() // 2, screen_h // 2))
+    # Example game screen logic
+    screen.fill((0, 0, 0))
+    background_maze(image)
+    # Add your game logic here
 
     menu_button.update()
     menu_button.change_color(pygame.mouse.get_pos())
+
+def handle_rect_movement():
+    if slider_rect.collidepoint(pygame.mouse.get_pos()):
+        handle_rect.x = pygame.mouse.get_pos()[0] - handle_rect.width // 2
+        handle_rect.x = max(slider_rect.x, min(handle_rect.x, slider_rect.right - handle_rect.width))
+        volume = (handle_rect.x - slider_rect.x) / (slider_rect.width - handle_rect.width)
+        set_volume(volume)
+
+def toggle_sound_effects():
+    global sound_effects_enabled
+    sound_effects_enabled = not sound_effects_enabled
+
+def level_button_pressed(level_number):
+    global current_level
+    current_level = level_number - 1
+    return GAME
+
+def level_screen():
+    screen.fill((52, 78, 91))
+    screen.blit(level_select_background, (0, 0))
+
+    for button in level_buttons:
+        button.update()
+        button.change_color(pygame.mouse.get_pos())
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            return QUIT
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for button in level_buttons:
+                if button.check_for_input(pygame.mouse.get_pos()):
+                    return level_button_pressed(button.level_number)
+
+def draw_screen():
+    if current_state == MAIN_MENU:
+        main_menu()
+    elif current_state == LEVEL_SELECTION:
+        level_screen()
+    elif current_state == INTRO:
+        current_state = intro()
+    elif current_state == GAME:
+        game_screen()
+    elif current_state == Menu:
+        menu()
+    elif current_state == inthegame:
+        menu_inthegame()
+    pygame.display.update()
 
 run = True
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-
         if event.type == pygame.MOUSEBUTTONDOWN:
             if current_state == MAIN_MENU:
                 if start_button.check_for_input(pygame.mouse.get_pos()):
-                    current_state = INTRO if not video_played else GAME
+                    current_state = LEVEL_SELECTION
                 if exit_button.check_for_input(pygame.mouse.get_pos()):
                     run = False
                 if menu_button.check_for_input(pygame.mouse.get_pos()):
                     current_state = Menu
+            elif current_state == LEVEL_SELECTION:
+                for button in level_buttons:
+                    if button.check_for_input(pygame.mouse.get_pos()):
+                        current_level = button.level_number - 1
+                        current_state = GAME
             elif current_state == GAME:
                 if menu_button.check_for_input(pygame.mouse.get_pos()):
                     current_state = inthegame
@@ -265,16 +344,16 @@ while run:
                     volume = (handle_rect.x - slider_rect.x) / (slider_rect.width - handle_rect.width)
                     set_volume(volume)
                 if toggle_rect.collidepoint(pygame.mouse.get_pos()):
-                    sound_effects_enabled = not sound_effects_enabled
+                    toggle_sound_effects()
                     if sound_effects_enabled:
-                        button_sound.play()  # Play the sound when the toggle is clicked
+                        button_sound.play()
             elif current_state == inthegame:
                 if slider_rect.collidepoint(pygame.mouse.get_pos()):
                     handle_rect.x = pygame.mouse.get_pos()[0] - handle_rect.width // 2
                     volume = (handle_rect.x - slider_rect.x) / (slider_rect.width - handle_rect.width)
                     set_volume(volume)
                 if toggle_rect.collidepoint(pygame.mouse.get_pos()):
-                    sound_effects_enabled = not sound_effects_enabled
+                    toggle_sound_effects()
                     if sound_effects_enabled:
                         button_sound.play()
                 if exit_button_inthegame.check_for_input(pygame.mouse.get_pos()):
@@ -282,27 +361,8 @@ while run:
                 if resume_game.check_for_input(pygame.mouse.get_pos()):
                     current_state = GAME
                 if restart_game.check_for_input(pygame.mouse.get_pos()):
-                    current_state = MAIN_MENU  # Restart the game to the main menu
-            else:
-                pass
+                    current_state = MAIN_MENU
 
-        elif event.type == pygame.MOUSEBUTTONUP:
-            if current_state == Menu and slider_rect.collidepoint(pygame.mouse.get_pos()):
-                handle_rect.x = pygame.mouse.get_pos()[0] - handle_rect.width // 2
-                volume = (handle_rect.x - slider_rect.x) / (slider_rect.width - handle_rect.width)
-                set_volume(volume)
+    draw_screen()
 
-    if current_state == MAIN_MENU:
-        main_menu()
-    elif current_state == INTRO:
-        current_state = intro()
-    elif current_state == GAME:
-        game_screen()
-    elif current_state == Menu:
-        menu()
-    elif current_state == inthegame:
-        menu_inthegame()
-
-    pygame.display.update()
-
-pygame.quit() 
+pygame.quit()
