@@ -1,22 +1,40 @@
 import turtle
 import pygame
 import sys
-import random
 import time
+import os
+
+# Set working directory
+os.chdir(r"C:\Users\User\mini it\GitExercise-TC4L-10")
 
 # Initialize global variables
 walls = []
-door_position = None
+door_position = None  
+player = None
+monster = None
 
 def open_combat_window():
     pygame.init()
+    pygame.mixer.init()  # Initialize the mixer module
     combat_win = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Combat Game")
 
-    bg_image = pygame.image.load("background.jpg")  
+    # Load and play background music
+    pygame.mixer.music.load("bck.mp3")
+    pygame.mixer.music.play(-1)  # Loop the music indefinitely
+
+    # Load sound effect
+    impact_sound = pygame.mixer.Sound("impact-152508.mp3")
+
+    bg_image = pygame.image.load("background.jpg")
+    bullet_image = pygame.image.load("fireball.png")  
+    bullet_image = pygame.transform.scale(bullet_image, (100, 50))
 
     player_rect = pygame.Rect(100, 500, 60, 80)      
-    enemy_rect = pygame.Rect(600, 500, 60, 80) 
+    enemy_image = pygame.image.load("Monster1.png")
+    enemy_image = pygame.transform.scale(enemy_image, (200, 200))  # Adjusted size
+    enemy_rect = pygame.Rect(600, 400, 200, 200)  # Adjusted size
+
     bullets = []  # List to hold player bullets
     enemy_bullets = []  # List to hold enemy bullets
 
@@ -31,19 +49,32 @@ def open_combat_window():
     player_velocity_y = 0
     is_jumping = False
 
+    # Monster animation frames
+    monster_frames = [
+        pygame.transform.scale(pygame.image.load("Monster1.png"), (200, 200)),
+        pygame.transform.scale(pygame.image.load("Monster2.png"), (200, 200)),
+        pygame.transform.scale(pygame.image.load("Monster3.png"), (200, 200)),
+        pygame.transform.scale(pygame.image.load("Monster4.png"), (200, 200)),
+        pygame.transform.scale(pygame.image.load("Monster5.png"), (200, 200))
+    ]
+    monster_frame_index = 0
+    monster_animation_speed = 200  # Milliseconds per frame
+    last_monster_animation_time = time.time()
+
     # Enemy shooting timer
     last_enemy_shot = time.time()
     enemy_shoot_interval = 3 
 
-    # THIS IS THE MAIN LOOP FOR THE COMBAT WINDOW
+    # Main loop for the combat window
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.mixer.music.stop()
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    bullet_rect = pygame.Rect(player_rect.right, player_rect.top + player_rect.height // 2 - 5, 15, 10)  # Made bullets larger
+                    bullet_rect = pygame.Rect(player_rect.right, player_rect.top + player_rect.height // 2 - 5, 15, 10)
                     bullets.append(bullet_rect)
 
         keys = pygame.key.get_pressed()
@@ -68,69 +99,74 @@ def open_combat_window():
         if player_rect.x > 800 - player_rect.width:
             player_rect.x = 800 - player_rect.width
 
-        # bullets
+        # Update bullets
         for bullet in bullets[:]:
             bullet.x += 15  
             if bullet.x > 800:  
                 bullets.remove(bullet)
-            # This is the collision with enemy u dumbass
             if bullet.colliderect(enemy_rect):
-                enemy_health -= 10  # Reduce enemy health
-                bullets.remove(bullet)  # Remove bullet after hit
+                enemy_health -= 10
+                impact_sound.play()  # Play impact sound effect
+                bullets.remove(bullet)
                 if enemy_health <= 0:
                     print("Enemy defeated!")
+                    pygame.mixer.music.stop()
                     pygame.quit()
                     sys.exit()
 
-        # Monster shoots every 3 seconds cause its noob
+        # Monster shoots every 3 seconds
         current_time = time.time()
         if current_time - last_enemy_shot >= enemy_shoot_interval:
-            enemy_bullet = pygame.Rect(enemy_rect.left - 25, enemy_rect.top + enemy_rect.height // 2 - 5, 20, 10)  # Made bullets larger
+            enemy_bullet = pygame.Rect(enemy_rect.left - 25, enemy_rect.top + enemy_rect.height // 2 - 5, 20, 10)
             enemy_bullets.append(enemy_bullet)
             last_enemy_shot = current_time
 
         # Move enemy bullets
         for bullet in enemy_bullets[:]:
-            bullet.x -= 10  
+            bullet.x -= 50     
             if bullet.x < 0:  
                 enemy_bullets.remove(bullet)
-            # This is the collision with the player u dumbass
             if bullet.colliderect(player_rect):
-                player_health -= 10  # Reduce player health
-                enemy_bullets.remove(bullet)  # Remove bullet after hit
+                player_health -= 10
+                enemy_bullets.remove(bullet)
                 if player_health <= 0:
                     print("Player defeated!")
+                    pygame.mixer.music.stop()
                     pygame.quit()
                     sys.exit()
+
+        # Monster frame-by-frame animation
+        if current_time - last_monster_animation_time >= monster_animation_speed / 1000:
+            monster_frame_index = (monster_frame_index + 1) % len(monster_frames)
+            last_monster_animation_time = current_time
 
         # Render the game
         combat_win.blit(pygame.transform.scale(bg_image, (800, 600)), (0, 0))
         pygame.draw.rect(combat_win, (0, 255, 0), player_rect)  
-        pygame.draw.rect(combat_win, (255, 0, 0), enemy_rect)  
+        combat_win.blit(monster_frames[monster_frame_index], enemy_rect)  
 
-        # Draw bullets from both enemy and player
+        # Draw bullets
         for bullet in bullets:
-            pygame.draw.rect(combat_win, (255, 255, 0), bullet) #yellow colour
+            combat_win.blit(bullet_image, (bullet.x, bullet.y))
         for bullet in enemy_bullets:
-            pygame.draw.rect(combat_win, (0, 0, 255), bullet)  #blue colour
+            pygame.draw.rect(combat_win, (0, 0, 255), bullet)
 
-        # Draw player health bar (top left)
+        # Draw health bars
         player_health_bar_width = 200 * (player_health / 100)
-        pygame.draw.rect(combat_win, (255, 0, 0), (50, 20, 200, 20))  # Background bar (red)
-        pygame.draw.rect(combat_win, (0, 255, 0), (50, 20, player_health_bar_width, 20))  # Health bar (green)
+        pygame.draw.rect(combat_win, (255, 0, 0), (50, 20, 200, 20))
+        pygame.draw.rect(combat_win, (0, 255, 0), (50, 20, player_health_bar_width, 20))
         
-        # Draw enemy health bar (top right)
         enemy_health_bar_width = 200 * (enemy_health / 100)
-        pygame.draw.rect(combat_win, (255, 0, 0), (combat_win.get_width() - 250, 20, 200, 20))  # Background bar (red)
-        pygame.draw.rect(combat_win, (0, 255, 0), (combat_win.get_width() - 250, 20, enemy_health_bar_width, 20))  # Health bar (green)
+        pygame.draw.rect(combat_win, (255, 0, 0), (combat_win.get_width() - 250, 20, 200, 20))
+        pygame.draw.rect(combat_win, (0, 255, 0), (combat_win.get_width() - 250, 20, enemy_health_bar_width, 20))
 
         pygame.display.update()
-
         clock.tick(30)
 
-# Maze game setup
 def setup_maze(level):
     global door_position, walls
+
+    win.tracer(0)  # Turn off automatic screen updates
 
     pen.clearstamps() 
     walls.clear()  
@@ -163,6 +199,9 @@ def setup_maze(level):
     if door_position is None:
         print("Door position not set.")
 
+    win.update()  # Update the screen once after drawing the entire maze
+    win.tracer(1)  # Turn automatic screen updates back on
+
 win = turtle.Screen()
 win.bgpic("sword_bg.gif")
 win.title("Infinite Maze")
@@ -178,18 +217,16 @@ win.register_shape("Monster3.5.gif")
 win.register_shape("Monster4.5.gif")
 win.register_shape("Monster5.5.gif")
 
-# Pen class to draw the walls and door
 class Pen(turtle.Turtle):
-    def __init__(self):
+    def __init__(self):  # Corrected from _init_
         super().__init__()
         self.shape("wall.img.gif")
         self.color("white")
         self.penup()
         self.speed(0)
 
-# Player class with integrated movement methods
 class Player(turtle.Turtle):
-    def __init__(self):
+    def __init__(self):  # Corrected from _init_
         super().__init__()
         self.shape("Standing.gif")  
         self.color("green")
@@ -197,7 +234,6 @@ class Player(turtle.Turtle):
         self.speed(0)
         self.goto(-264, 264)  
 
-    # Movement methods
     def move_up(self):
         self.shape("Standing.gif")  
         new_x = self.xcor()
@@ -232,26 +268,23 @@ class Player(turtle.Turtle):
 
     def check_if_at_door(self):
         if (self.xcor(), self.ycor()) == door_position:
-            print("You've reached the door! Game Over.")
             turtle.bye()
 
-# Monster class for PNG animation frame by frame
 class Monster(turtle.Turtle):
-    def __init__(self):
+    def __init__(self):  # Corrected from _init_
         super().__init__()
         self.frames = ["Monster1.5.gif", "Monster2.5.gif", "Monster3.5.gif", "Monster4.5.gif", "Monster5.5.gif"]
         self.frame_index = 0
         self.shape(self.frames[self.frame_index])
         self.penup()
-        self.speed(0)
-        self.goto(250, -310)  # Position of the monster in the maze
+        self.speed(0) 
+        self.goto(250, -310)  
 
     def animate(self):
         self.frame_index = (self.frame_index + 1) % len(self.frames)
         self.shape(self.frames[self.frame_index])
         turtle.ontimer(self.animate, 200)  
 
-# Maze layout
 level_1 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXX",
     "XP  XXXXXXX          XXXXX",
@@ -293,17 +326,14 @@ monster.animate()
 def check_for_collision():
     if player.distance(monster) < 24:
         turtle.bye()  
-        open_combat_window()  # Opens the combat window
+        open_combat_window()  
 
-# Keyboard bindings for player movement in the maze
 win.listen()
 win.onkey(player.move_up, "Up")
 win.onkey(player.move_down, "Down")
 win.onkey(player.move_left, "Left")
 win.onkey(player.move_right, "Right")
-win.onkey(open_combat_window, "space")  
 
-# Check for collision between player and monster
-turtle.ontimer(check_for_collision, 100)  # Check every 100ms
+turtle.ontimer(check_for_collision, 100)  
 
 turtle.mainloop()
