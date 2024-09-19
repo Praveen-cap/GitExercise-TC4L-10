@@ -20,16 +20,16 @@ win.register_shape("trap.gif")
 win.register_shape("puzzle_icon.gif") 
 
 class Pen(turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
+    def _init_(self):
+        turtle.Turtle._init_(self)
         self.shape("wall.img.gif")
         self.color("white")
         self.penup()
         self.speed(0)
 
 class MovingBrick(turtle.Turtle):
-    def __init__(self, start_pos, move_distance):
-        turtle.Turtle.__init__(self)
+    def _init_(self, start_pos, move_distance):
+        turtle.Turtle._init_(self)
         self.shape("wall.img.gif")
         self.color("white")
         self.penup()
@@ -58,8 +58,8 @@ class MovingBrick(turtle.Turtle):
 
 
 class Player (turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
+    def _init_(self):
+        turtle.Turtle._init_(self)
         self.shape("square")
         self.color("blue")
         self.penup()
@@ -118,7 +118,7 @@ class Player (turtle.Turtle):
 
     def open_puzzle_game(self):
         turtle.bye()  
-        puzzle_game = PuzzleGame("dragon-vettai-ku-whistle-podu-.gif")
+        puzzle_game = PuzzleGame("warrior.gif")
         puzzle_game.main()
 
 levels = [""]
