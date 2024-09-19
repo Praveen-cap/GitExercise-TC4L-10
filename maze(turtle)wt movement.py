@@ -111,7 +111,7 @@ class Obstacle(turtle.Turtle):
 # Define the maze layout
 level_2 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X  XXXF      OXXX          X",
+    "X  XXXF      OXXXF        X",
     "X  XX   XXXXS XX  XX  XXXXX",
     "X   F  XXXXX     SXXX OXXX",
     "XS  XX  XXXO    XX     FXX",
