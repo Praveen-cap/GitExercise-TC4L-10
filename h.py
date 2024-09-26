@@ -1,5 +1,7 @@
 import pygame
 from pyvidplayer import Video
+from puzle import PuzzleGame
+from datetime import datetime
 
 
 pygame.init()
@@ -74,9 +76,6 @@ start_button = Button(475, 420, button_surface, "START")
 exit_button = Button(475, 500, button_surface, "EXIT")
 back_button = Button(475, 540, button_surface, "Back")
 
-exit_button_inthegame = Button(250, 550, button_surface, "EXIT")
-restart_game = Button(700, 550, button_surface, "RESTART")
-resume_game  = Button(475, 550, button_surface, "RESUME")
 
 menu_button_surface = pygame.image.load("menu_button.png")
 menu_button_surface = pygame.transform.scale(menu_button_surface, (40, 40)) 
@@ -103,11 +102,10 @@ toggle_on_color = (0, 255, 0)
 toggle_off_color = (255, 0, 0)
 toggle_handle_color = (255, 255, 255)
 
-# Load images for toggle ON and OFF states
-toggle_on_image = pygame.image.load("on.png")  # Replace with the actual image path
-toggle_off_image = pygame.image.load("off.png")  # Replace with the actual image path
 
-# Rescale the images to fit the toggle size
+toggle_on_image = pygame.image.load("on.png")  
+toggle_off_image = pygame.image.load("off.png")  
+
 toggle_on_image = pygame.transform.scale(toggle_on_image, (toggle_width, toggle_height))
 toggle_off_image = pygame.transform.scale(toggle_off_image, (toggle_width, toggle_height))
 
@@ -115,7 +113,6 @@ MAIN_MENU = "main_menu"
 INTRO = "intro"
 GAME = "game"
 Menu = "Options"
-inthegame = "menu_inthegame"
 QUIT = "quit"
 
 LEVELS = "levels"
@@ -208,46 +205,6 @@ def menu():
     back_button.update()
     back_button.change_color(pygame.mouse.get_pos())
 
-def menu_inthegame():
-    screen.fill((52, 78, 91))
-    background_maze(menu_background)
-
-    instruction_text = [
-        "INSTRUCTIONS:",
-        "Use Arrow Keys to move the player",
-        "Press SPACE to jump",
-        "Press Right Arrow to skip the video",
-        "Objective: Defeat the monsters & escape the maze",
-    ]
-    for i, line in enumerate(instruction_text):
-        text_surface = font.render(line, True, (255, 255, 0))
-        screen.blit(text_surface, (screen_w // 2 - text_surface.get_width() // 2, 225 + i * 45))
-
-    volume_label = font.render("Volume:", True, (255, 255, 255))
-    screen.blit(volume_label, (250, 100))
-
-    pygame.draw.rect(screen, slider_bg_color, slider_rect)
-    pygame.draw.rect(screen, slider_border_color, slider_rect, slider_border_width)
-    handle_rect.x = slider_rect.x + int(volume * (slider_rect.width - handle_rect.width))
-    pygame.draw.rect(screen, slider_handle_color, handle_rect)
-
-    # Draw the toggle image based on the sound effect status
-    toggle_image = toggle_on_image if sound_effects_enabled else toggle_off_image
-    screen.blit(toggle_image, (toggle_rect.x, toggle_rect.y))
-
-    toggle_text = "Sound ON :" if sound_effects_enabled else "Sound OFF :"
-    text_surface = font.render(toggle_text, True, (255, 255, 255))
-    screen.blit(text_surface, (250, 125 + toggle_height + 10))
-
-    exit_button_inthegame.update()
-    exit_button_inthegame.change_color(pygame.mouse.get_pos())
-
-    restart_game.update()
-    restart_game.change_color(pygame.mouse.get_pos())
-
-    resume_game.update()
-    resume_game.change_color(pygame.mouse.get_pos())
-
 def levels_screen():
     screen.fill((52, 78, 91))
     background_maze(level_bckgrd)
@@ -256,20 +213,19 @@ def levels_screen():
     level1_button.change_color(pygame.mouse.get_pos())
 
     level2_button.update()
-    level2_button.change_color(pygame.mouse.get_pos())
-
     level3_button.update()
-    level3_button.change_color(pygame.mouse.get_pos())
-
     level4_button.update()
-    level4_button.change_color(pygame.mouse.get_pos())
+ 
 
     if unlocked_levels >= 2:
         level2_button.update()
+        level2_button.change_color(pygame.mouse.get_pos())
     if unlocked_levels >= 2:
         level3_button.update()
+        level3_button.change_color(pygame.mouse.get_pos())
     if unlocked_levels >= 2:
         level4_button.update()
+        level4_button.change_color(pygame.mouse.get_pos())
 
     menu_button.update()
     menu_button.change_color(pygame.mouse.get_pos())
@@ -277,6 +233,7 @@ def levels_screen():
 def handle_level_selection():
     global current_state, current_level
     if level1_button.check_for_input(pygame.mouse.get_pos()):
+
         current_level = LEVEL_1
         current_state = GAME
     if unlocked_levels >= 2 and level1_button.check_for_input(pygame.mouse.get_pos()):
@@ -289,11 +246,25 @@ def handle_level_selection():
         current_level = LEVEL_4
         current_state = GAME
 
+def save_level(level, score=None):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M")
+    if score is not None:
+        with open("completed_levels.txt", "a") as file:
+            file.write(f"{level} - Score: {score} - completed on {timestamp}\n")
+    else:
+        with open("completed_levels.txt", "a") as file:
+            file.write(f"{level} - completed on {timestamp}\n")
+
+
 def game_screen():
-    screen.fill((0,0,0))
+    global unlocked_levels
+    screen.fill((0, 0, 0))
     game_text = font.render(f"Playing {current_level.upper()}....", True, "white")
     screen.blit(game_text, (screen_w // 2 - game_text.get_width() // 2, screen_h // 2))
-
+    
+    # Save the current level when the game starts
+    save_level(current_level)
+    
     menu_button.update()
     menu_button.change_color(pygame.mouse.get_pos())
 
@@ -321,7 +292,8 @@ while run:
 
             elif current_state == GAME:
                 if menu_button.check_for_input(pygame.mouse.get_pos()):
-                    current_state = inthegame
+                    current_state = Menu
+
 
             elif current_state == Menu:
                 if back_button.check_for_input(pygame.mouse.get_pos()):
@@ -333,23 +305,7 @@ while run:
                 if toggle_rect.collidepoint(pygame.mouse.get_pos()):
                     sound_effects_enabled = not sound_effects_enabled
                     if sound_effects_enabled:
-                        button_sound.play()
-                          
-            elif current_state == inthegame:
-                if slider_rect.collidepoint(pygame.mouse.get_pos()):
-                    handle_rect.x = pygame.mouse.get_pos()[0] - handle_rect.width // 2
-                    volume = (handle_rect.x - slider_rect.x) / (slider_rect.width - handle_rect.width)
-                    set_volume(volume)
-                if toggle_rect.collidepoint(pygame.mouse.get_pos()):
-                    sound_effects_enabled = not sound_effects_enabled
-                    if sound_effects_enabled:
-                        button_sound.play()
-                if exit_button_inthegame.check_for_input(pygame.mouse.get_pos()):
-                    run = False
-                if resume_game.check_for_input(pygame.mouse.get_pos()):
-                    current_state = GAME
-                if restart_game.check_for_input(pygame.mouse.get_pos()):
-                    current_state = MAIN_MENU  # Restart the game to the main menu
+                        button_sound.play()                         
             else:
                 pass
 
@@ -369,8 +325,6 @@ while run:
         game_screen()
     elif current_state == Menu:
         menu()
-    elif current_state == inthegame:
-        menu_inthegame()
 
     pygame.display.update()
 
