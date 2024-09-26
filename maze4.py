@@ -62,7 +62,7 @@ class Player(turtle.Turtle):
     def move_up(self):
         new_x = self.xcor()
         new_y = self.ycor() + 40
-        if (new_x, new_y) not in walls:
+        if (new_x, new_y) not in walls: #x
             self.goto(new_x, new_y)
 
     def move_down(self):
@@ -85,7 +85,7 @@ class Player(turtle.Turtle):
 
     def update_status(self):
         status_pen.clear()
-        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Courier", 16, "normal"))
+        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Times New Roman", 16, "bold"))
 
 # Door class to represent the exit
 class Door(turtle.Turtle):
@@ -177,7 +177,7 @@ class Heart(turtle.Turtle):
                 turtle.bye()  # Close the game window
 wn.update()
 # Define the third level layout
-level_3 = [
+level_4 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
     "X   XXF   L  L  CX  F      XXXXXX",
     "X   X   XXXXS     XX  T   XX   XX",
@@ -208,13 +208,13 @@ level_3 = [
 #level.append(level_3)
 
 # List to store wall coordinates
-walls = []
+ 
 obstacles = []
 powerups = []
 keys = []
 treasures = []
 teleport_holes = []
-
+walls = []
 def setup_maze(level):
     wn.tracer(0)
     for y in range(len(level)):
@@ -262,7 +262,7 @@ def setup_maze(level):
 def interact_obstacles():
     for obstacle in obstacles:
         if player.distance(obstacle) < 10:
-            player.goto(-320, 320)
+            player.goto(-320, 320) #mula
             heart_display.decrease_heart()  # Decrease heart count
             obstacle_sound.play() 
             print("You hit an obstacle! Try again.")
@@ -323,9 +323,9 @@ def interact_with_teleports():
         if player.distance(teleport) < 20:
             # Keep trying until we find a valid position
             while True:
-                new_x = random.choice(range(-400, 400, 40))  # MULTIPLES OF 32 TO STAY ON THE GRID
+                new_x = random.choice(range(-400, 400, 40))  #  TO STAY ON THE GRID
                 new_y = random.choice(range(-400, 400, 40))  # creates a new random nposition withinn the grid
-                if is_position_valid(new_x, new_y):
+                if is_position_valid(new_x, new_y): #if no wall thn yes
                     player.goto(new_x, new_y)
                     #portal_sound.play()
                     print("You've used the teleport hole!")
@@ -358,7 +358,7 @@ door = Door()
 heart_display = Heart()  # Initialize heart display
 # Setup the
 # Setup the level
-setup_maze(level_3)
+setup_maze(level_4)
 
 # Create a pen for the status bar
 status_pen = turtle.Turtle()
@@ -371,7 +371,7 @@ status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {pl
 
 # Timer settings
 game_time_limit = 60
-start_time = time.time() #capture current time when the game begins.so will start from the beginning
+start_time = time.time() #record current time when the game begins.so will start from the beginning
 
 # displaying the timer
 timer_pen = turtle.Turtle()
@@ -382,7 +382,7 @@ timer_pen.goto(600, 390)
 
 # Function to update the timer display
 def update_timer():
-    elapsed_time = time.time() - start_time
+    elapsed_time = time.time() - start_time #tikme passed 
     remaining_time = max(0, game_time_limit - int(elapsed_time))  # no below 0
     
     
@@ -421,4 +421,6 @@ while True:
     check_door()
 
     wn.update()
+
+    #ALL GOOD. ADD THIS TRAP SOUND THO OTHER MAZE , AND KEY SYSTEM and status to maze 3
 

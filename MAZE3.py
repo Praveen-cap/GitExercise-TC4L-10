@@ -1,7 +1,7 @@
 import turtle
 import random
 import pygame
-
+import time
 pygame.mixer.init()
 
 # Load background music and sound effects (MP3 format)
@@ -17,6 +17,7 @@ key_sound = pygame.mixer.Sound("fire.mp3")
 portal_sound =pygame.mixer.Sound("fire.mp3")
 treasure_sound =pygame.mixer.Sound("TREASURE.mp3")
 door_locked_sound=pygame.mixer.Sound("door close.mp3")
+
 # Initialize the screen
 wn = turtle.Screen()
 wn.bgcolor("black")
@@ -35,6 +36,7 @@ wn.register_shape("KEY1 (1).gif")
 wn.register_shape("treasure.gif")
 wn.register_shape("random.gif")
 wn.bgpic("background3new.gif")
+wn.register_shape("heart (1).gif")
 
 # Pen class for drawing the walls
 class Pen(turtle.Turtle):
@@ -135,7 +137,45 @@ class TeleportHole(turtle.Turtle):
         self.shape("random.gif")
         self.penup()
         self.speed(0)
+class Heart(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("heart (1).gif")  # Heart image
+        self.penup()
+        self.hideturtle()  # Hide this main instance to avoid displaying an unwanted heart
+        self.speed(0)
+        self.hearts = 5  # Total number of hearts
+        self.positions = [(-700, 270 - (i * 40)) for i in range(5)]  # Positions for hearts , 40 units apart vertically starting at (-700,270)
+        self.heart_objects = []
+        self.create_hearts()
 
+    def create_hearts(self):
+        for pos in self.positions: #loop thru each position in the list
+            heart = turtle.Turtle()
+            heart.hideturtle()
+            heart.shape("heart (1).gif")
+            heart.penup()
+            heart.speed(0)
+            heart.goto(pos) #move to correct position
+            self.heart_objects.append(heart)
+        self.update_display()
+
+    def update_display(self):
+        for i in range(len(self.heart_objects)):
+            if i < self.hearts: ## If the index is less than the number of hearts
+                self.heart_objects[i].showturtle()
+            else:
+                self.heart_objects[i].hideturtle()
+
+    def decrease_heart(self):
+        if self.hearts > 0:
+            self.hearts -= 1
+            self.update_display()
+            print(f"Heart lost! Remaining hearts: {self.hearts}")
+            if self.hearts == 0:
+                print("Game Over!")
+                turtle.bye()  # Close the game window
+wn.update()
 # Define the third level layout
 level_3 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -224,8 +264,10 @@ def interact_obstacles():
     for obstacle in obstacles:
         if player.distance(obstacle) < 10:
             player.goto(-320, 320)
+            heart_display.decrease_heart()  # Decrease heart count
             obstacle_sound.play() 
             print("You hit an obstacle! Try again.")
+
 
 def collect_powerups():
     for powerup in powerups:
@@ -315,6 +357,7 @@ def collect_treasures():
 pen = Pen()
 player = Player()
 door = Door()
+heart_display = Heart()  # Initialize heart display
 
 # Setup the
 # Setup the level
@@ -326,7 +369,38 @@ status_pen.penup()
 status_pen.hideturtle()
 status_pen.goto(0, 370)
 status_pen.color("white")
-status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {player.shield} | Keys: {player.keys_collected}", align="center", font=("Courier", 16, "normal"))
+status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {player.shield} | Keys: {player.keys_collected}", align="center", font=("Times New Roman", 16, "bold"))
+
+# Timer settings
+game_time_limit = 60
+start_time = time.time() #capture current time when the game begins.so will start from the beginning
+
+# displaying the timer
+timer_pen = turtle.Turtle()
+timer_pen.hideturtle()
+timer_pen.penup()
+timer_pen.color("white")
+timer_pen.goto(600, 390)
+
+# Function to update the timer display
+def update_timer():
+    elapsed_time = time.time() - start_time
+    remaining_time = max(0, game_time_limit - int(elapsed_time))  # no below 0
+    
+    
+    timer_pen.clear()
+    timer_pen.write(f"Time left: {remaining_time}s", align="center", font=("Times New Roman", 16, "bold"))
+    
+    
+    if remaining_time <= 0:
+        print("Time's up! You didn't finish the maze in time. Game Over!")
+        turtle.bye() 
+    else:
+        
+        wn.ontimer(update_timer, 1000)  # Update every second
+
+# Call the function to start the timer
+update_timer()
 
 # Keyboard bindings for player movements
 wn.listen()
@@ -338,11 +412,11 @@ wn.onkey(player.move_right, "Right")
 # Main game loop
 while True:
     # Check if the player has reached the door
-    #if player.distance(door) < 10:
-     #   door_sound.play()
-      #  print("You've reached the door! You win!")
-       # pygame.mixer.music.stop()
-        #break
+    if player.distance(door) < 10:
+        door_sound.play()
+        print("You've reached the door! You win!")
+        pygame.mixer.music.stop()
+        break
 
     # Check for interactions with obstacles
     interact_obstacles()
@@ -362,3 +436,4 @@ while True:
    # pygame.mixer.music.stop()  # Ensure the music stops if the window is closed
 
 #background small .key n portal not working .the sound effect not working.
+#when i go door without key .the game is ending , status bar kolar
