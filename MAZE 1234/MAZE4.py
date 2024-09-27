@@ -1,7 +1,7 @@
 import turtle
 import random
 import pygame
-
+import time
 pygame.mixer.init()
 
 # Load background music and sound effects (MP3 format)
@@ -24,7 +24,7 @@ wn.title("INFINITE MAZE")
 wn.setup(800, 600)
 
 # Register shapes
-wn.register_shape("brick.gif")
+wn.register_shape("brick4.gif")
 wn.register_shape("LEVEL3.gif")
 wn.register_shape("trap ori.gif")
 wn.register_shape("fire new2.gif")
@@ -33,26 +33,20 @@ wn.register_shape("sheildd.gif")
 wn.register_shape("doorr.gif")
 wn.register_shape("KEY1 (1).gif")
 wn.register_shape("treasure.gif")
-wn.register_shape("portal.gif")
-wn.bgpic("background3new.gif")
-wn.register_shape("Monster 3.1.gif")
-wn.register_shape("Monster 3.2.gif")
-wn.register_shape("Monster 3.3.gif")
-wn.register_shape("Monster 3.4.gif")
-wn.register_shape("Monster 3.5.gif")
-wn.register_shape("Monster 3.6.gif")
-wn.register_shape("standing.gif")  
-wn.register_shape("up.gif")  
-wn.register_shape("down.gif")  
-wn.register_shape("left.gif")  
+wn.register_shape("random.gif")
+wn.register_shape("heart (1).gif")
+wn.bgpic("future3.gif")
+wn.register_shape("up.gif")
+wn.register_shape("down.gif")
+wn.register_shape("left.gif")
 wn.register_shape("right.gif")
+wn.register_shape("standing.gif")  
 
 # Pen class for drawing the walls
-
 class Pen(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
-        self.shape("brick.gif")
+        self.shape("brick4.gif")
         self.penup()
         self.speed(0)
 
@@ -109,20 +103,7 @@ class Player(turtle.Turtle):
         status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Courier", 16, "normal"))
 
 
-class Monster(turtle.Turtle):
-    def __init__(self):
-        super().__init__()
-        self.frames = ["Monster 3.1.gif", "Monster 3.2.gif", "Monster 3.3.gif", "Monster 3.4.gif", "Monster 3.5.gif", "Monster 3.6.gif"]
-        self.frame_index = 0
-        self.shape(self.frames[self.frame_index])
-        self.penup()
-        self.speed(0)
-        self.goto(125, -5)  # Position of the monster in the maze
 
-    def animate(self):
-        self.frame_index = (self.frame_index + 1) % len(self.frames)  # Cycle through the frames
-        self.shape(self.frames[self.frame_index])
-        turtle.ontimer(self.animate, 200)  # Adjust the time interval for animation (in milliseconds)
 
 # Door class to represent the exit
 class Door(turtle.Turtle):
@@ -131,7 +112,7 @@ class Door(turtle.Turtle):
         self.shape("doorr.gif")
         self.penup()
         self.speed(0)
-        self.goto(384, -384)
+        self.goto(400, -400)
 
 # PowerUp class for power-up items (Fire, Life Potion, Shield)
 class PowerUp(turtle.Turtle):
@@ -160,7 +141,7 @@ class Key(turtle.Turtle):
 
 # Treasure class
 class Treasure(turtle.Turtle):
-    def __init__(self):
+    def ___init__(self):
         turtle.Turtle.__init__(self)
         self.shape("treasure.gif")
         self.penup()
@@ -170,37 +151,75 @@ class Treasure(turtle.Turtle):
 class TeleportHole(turtle.Turtle):
     def __init__(self):
         turtle.Turtle.__init__(self)
-        self.shape("portal.gif")
+        self.shape("random.gif")
         self.penup()
         self.speed(0)
 
+class Heart(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("heart (1).gif")  # Heart image
+        self.penup()
+        self.hideturtle()  # Hide this main instance to avoid displaying an unwanted heart
+        self.speed(0)
+        self.hearts = 5  # Total number of hearts
+        self.positions = [(-700, 270 - (i * 40)) for i in range(5)]  # Positions for hearts
+        self.heart_objects = []
+        self.create_hearts()
+
+    def create_hearts(self):
+        for pos in self.positions:
+            heart = turtle.Turtle()
+            heart.hideturtle()
+            heart.shape("heart (1).gif")
+            heart.penup()
+            heart.speed(0)
+            heart.goto(pos)
+            self.heart_objects.append(heart)
+        self.update_display()
+
+    def update_display(self):
+        for i in range(len(self.heart_objects)):
+            if i < self.hearts:
+                self.heart_objects[i].showturtle()
+            else:
+                self.heart_objects[i].hideturtle()
+
+    def decrease_heart(self):
+        if self.hearts > 0:
+            self.hearts -= 1
+            self.update_display()
+            print(f"Heart lost! Remaining hearts: {self.hearts}")
+            if self.hearts == 0:
+                print("Game Over!")
+                turtle.bye()  # Close the game window
+wn.update()
 # Define the third level layout
 level_3 = [
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X   XXF  K      CX     XXXXXX",
-    "X   X   XXXXS     XX     XXXX",
-  "XX     F  XXXXX     SXXX  O XXX",
-  "XS  XX   XXO    XX  K K F    XX",
-  "XXX   XL  XXXX  X   XXXX   XXX",
-  "XX         K  XXX   XXX   XXX",
-    "XXXS  XXX  XXXXXX         XXXXXX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "X   XXF   L  L  CX  F      XXXXXX",
+    "X   X   XXXXS     XX  T   XX   XX",
+    "XX     F  XXXXX     SXXX  O X XX",
+    "XS  XX   XXO    XX     F    XXXXX",
+    "XXX   XL  XXXX  X   XXXX   XL  XX",
+    "XX            XXX   XXX   XK  OXX",
+ " XXXS  XXX  XXXXXX       XX FXXX",
     "XXX  O  F  XXXXX     S  XXX   XX",
-    "XXX       XXXXX  XXX   XXX       XX",
-    "XXX LXXX      F   XX          XXX",
-    "XXX   F     XXXXXX       XXXXOXX",
-    "XX     XXXXXX    YXXXX     L  XX",
-    "XXX    XXX   F   F   K      XXX",
-    "XXO  F  XX     XX   F     OXX",
+    "XXX       XXXXX  XXX   XXX L  XX",
+    "XXX LXXX      F   XX       O  XXX",
+    " XXXX   F   XXXXXXXX  F F     XXX",
+    "XK     XXXXXX   YXXXX     L  XXX",
+    "XXX    XXX     FXXF          XXX",
+    "XXO  F  XX     XX   F     O  XX",
     " XX  XXX  F  XXXXXO      X   XXX",
-  "X  XX  F   XXXXXX       XXXXXXXX",
-   "XXXXXXO    TT   F  XXCXXXXX",
-    "XX  XXF      LXXXXXX    XX",
-    "XX    XXXXXXXXX   S XX",
-    "XXS     XX  X    XO      C  XX",
-    "XX  X  XX  XX  XXX  X   X",
-    "XX  X    XXXXX  XXX     XX",
-    "XXXO F   X   FF        XXXXX",
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+    "X  XX  F   XXXXXX       XXXXXXXX",
+   " XXXXXOT    T   F  XXCX    K  XXX",
+    " XXL XXF      LXXXXXX    XX   XXX",
+    " XXX    X  XXXF  F    F XXX   S XX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XX  XK    XXXXX  XXX      XXXXXXX",
+    "XXXO F   X   FF        XX  XXXXX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ]
 
 # Add the level to the levels list
@@ -213,16 +232,14 @@ powerups = []
 keys = []
 treasures = []
 teleport_holes = []
-monster = Monster()
-monster.animate()
 
 def setup_maze(level):
     wn.tracer(0)
     for y in range(len(level)):
         for x in range(len(level[y])):
             character = level[y][x]
-            screen_x = -384 + (x * 32)
-            screen_y = 384 - (y * 32)
+            screen_x = -600 + (x * 40)
+            screen_y = 400 - (y * 40)
             
             if character == "X":
                 pen.goto(screen_x, screen_y)
@@ -264,6 +281,7 @@ def interact_obstacles():
     for obstacle in obstacles:
         if player.distance(obstacle) < 10:
             player.goto(-320, 320)
+            heart_display.decrease_heart()  # Decrease heart count
             obstacle_sound.play() 
             print("You hit an obstacle! Try again.")
 
@@ -323,8 +341,8 @@ def interact_with_teleports():
         if player.distance(teleport) < 20:
             # Keep trying until we find a valid position
             while True:
-                new_x = random.choice(range(-384, 384, 32))  # MULTIPLES OF 32 TO STAY ON THE GRID
-                new_y = random.choice(range(-384, 384, 32))  # creates a new random nposition withinn the grid
+                new_x = random.choice(range(-400, 400, 40))  # MULTIPLES OF 32 TO STAY ON THE GRID
+                new_y = random.choice(range(-400, 400, 40))  # creates a new random nposition withinn the grid
                 if is_position_valid(new_x, new_y):
                     player.goto(new_x, new_y)
                     #portal_sound.play()
@@ -355,7 +373,7 @@ def collect_treasures():
 pen = Pen()
 player = Player()
 door = Door()
-
+heart_display = Heart()  # Initialize heart display
 # Setup the
 # Setup the level
 setup_maze(level_3)
@@ -367,6 +385,38 @@ status_pen.hideturtle()
 status_pen.goto(0, 370)
 status_pen.color("white")
 status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {player.shield} | Keys: {player.keys_collected}", align="center", font=("Courier", 16, "normal"))
+
+
+# Timer settings
+game_time_limit = 120  # 2 minutes (120 seconds)
+start_time = time.time()
+
+# Pen for displaying the timer
+timer_pen = turtle.Turtle()
+timer_pen.hideturtle()
+timer_pen.penup()
+timer_pen.color("white")
+timer_pen.goto(600, 380)
+
+# Function to update the timer display
+def update_timer():
+    elapsed_time = time.time() - start_time
+    remaining_time = max(0, game_time_limit - int(elapsed_time))  # Don't go below 0
+    
+    # Update the timer display
+    timer_pen.clear()
+    timer_pen.write(f"Time left: {remaining_time}s", align="center", font=("Courier", 16, "normal"))
+    
+    # Check if time has run out
+    if remaining_time <= 0:
+        print("Time's up! You didn't finish the maze in time. Game Over!")
+        turtle.bye()  # Close the game window
+    else:
+        # Continue updating the timer
+        wn.ontimer(update_timer, 1000)  # Update every second
+
+# Call the function to start the timer
+update_timer()
 
 # Keyboard bindings for player movements
 wn.listen()

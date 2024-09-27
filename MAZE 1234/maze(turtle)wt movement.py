@@ -2,6 +2,9 @@ import turtle
 import pygame
 import sys
 import time
+import os
+
+os.chdir(r"C:\Users\User\mini it\GitExercise-TC4L-10\MAZE 1234")
 
 pygame.mixer.init()
 
@@ -36,6 +39,11 @@ wn.register_shape("Monster 2.3.gif")
 wn.register_shape("Monster 2.4.gif")
 wn.register_shape("Monster 2.5.gif")
 wn.register_shape("Monster 2.6.gif")
+wn.register_shape("standing.gif")  
+wn.register_shape("up.gif")  
+wn.register_shape("down.gif")  
+wn.register_shape("left.gif")  
+wn.register_shape("right.gif")
 
 # Set background image
 wn.bgpic("bing3.gif")
@@ -52,44 +60,54 @@ class Pen(turtle.Turtle):
 class Player(turtle.Turtle):
     def __init__(self):
         super().__init__()
-        self.shape("character2.gif")
-        self.color("green")
+        self.shape("standing.gif")  # Start with the idle GIF
         self.penup()
         self.speed(0)
         self.goto(-320, 320)
         self.fire_power = 0
-        self.life = 1
+        self.life = 3  # Or any initial life you want
         self.shield = 0
+        self.keys_collected = 0
 
-    # Movement methods
     def move_up(self):
         new_x = self.xcor()
         new_y = self.ycor() + 32
         if (new_x, new_y) not in walls:
+            self.shape("up.gif")  # Change to the up movement GIF
             self.goto(new_x, new_y)
+            turtle.ontimer(self.stop, 300)  # Go back to idle after 300ms
 
     def move_down(self):
         new_x = self.xcor()
         new_y = self.ycor() - 32
         if (new_x, new_y) not in walls:
+            self.shape("down.gif")  # Change to the down movement GIF
             self.goto(new_x, new_y)
+            turtle.ontimer(self.stop, 300)
 
     def move_left(self):
         new_x = self.xcor() - 32
         new_y = self.ycor()
         if (new_x, new_y) not in walls:
+            self.shape("left.gif")  # Change to the left movement GIF
             self.goto(new_x, new_y)
+            turtle.ontimer(self.stop, 300)
 
     def move_right(self):
         new_x = self.xcor() + 32
         new_y = self.ycor()
         if (new_x, new_y) not in walls:
+            self.shape("right.gif")  # Change to the right movement GIF
             self.goto(new_x, new_y)
+            turtle.ontimer(self.stop, 300)
 
-    # Update status
+    def stop(self):
+        self.shape("standing.gif")  # Revert to the idle GIF when not moving
+
     def update_status(self):
         status_pen.clear()
-        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield}", align="center", font=("Courier", 16, "normal"))
+        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Courier", 16, "normal"))
+
 
 # Monster class to animate the monster
 class Monster(turtle.Turtle):
@@ -144,7 +162,7 @@ level_2 = [
     "XX  XX  X    XXX   XXX  XX",
     "XXXS  XXX  XXXXXX  XX  XXX",
     "XXX  O  F  XXXXXX    S   X",
-    "XXX XXXXXXXXX   XX   XXX X",
+    "XXX XXXXXXXX   XX   XXX X",
     "XXX LXXX   X  F   XX   XXX",
     "XXX   F     X  XXXXXX  OXX",
     "XXXXX  XXXXX XXXX     L XX",
@@ -170,6 +188,7 @@ monster = Monster()
 monster.animate()
 
 # Function to open the combat window
+# Function to open the combat window
 def open_combat_window():
     pygame.init()
     combat_win = pygame.display.set_mode((800, 600))
@@ -178,8 +197,10 @@ def open_combat_window():
     bg_image = pygame.image.load("background.jpg")
     player_rect = pygame.Rect(100, 500, 60, 80)
     enemy_image = pygame.image.load("Monster 2.11.png")
-    enemy_image = pygame.transform.scale(enemy_image, (300, 300))
-    enemy_rect = pygame.Rect(500, 350, 300, 300)
+    enemy_image = pygame.transform.scale(enemy_image, (300, 300))  # Assuming the image size is 300x300
+# Manually adjust the rectangle size to fit better
+    enemy_rect = pygame.Rect(500, 350, enemy_image.get_width(), enemy_image.get_height())  # Match rectangle size to image size
+
 
     bullets = []
     enemy_bullets = []
@@ -206,6 +227,9 @@ def open_combat_window():
 
     last_enemy_shot = time.time()
     enemy_shoot_interval = 3
+
+    # Enemy chase speed
+    enemy_speed = 3  # You can adjust this to control how fast the enemy chases
 
     while True:
         for event in pygame.event.get():
@@ -237,15 +261,16 @@ def open_combat_window():
         if player_rect.x > 800 - player_rect.width:
             player_rect.x = 800 - player_rect.width
 
-        # Monster Movement Towards Player
+        # Enemy follows player
         if enemy_rect.x < player_rect.x:
-            enemy_rect.x += 1  # Move right
+            enemy_rect.x += enemy_speed  # Move right
         elif enemy_rect.x > player_rect.x:
-            enemy_rect.x -= 1  # Move left
+            enemy_rect.x -= enemy_speed  # Move left
+
         if enemy_rect.y < player_rect.y:
-            enemy_rect.y += 1  # Move down
+            enemy_rect.y += enemy_speed  # Move down
         elif enemy_rect.y > player_rect.y:
-            enemy_rect.y -= 1  # Move up
+            enemy_rect.y -= enemy_speed  # Move up
 
         # Prevent monster from going out of bounds
         if enemy_rect.left < 0:
