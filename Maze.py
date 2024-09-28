@@ -300,10 +300,12 @@ def update_timer():
     
     if remaining_time <= 0:
         print("Time's up! You didn't finish the maze in time. Game Over!")
+        pygame.mixer.music.stop()
         turtle.bye() 
     else:
         
         win.ontimer(update_timer, 1000)  # Update every second
+
 
 # Call the function to start the timer
 update_timer()
@@ -313,6 +315,30 @@ turtle.onkey(player.go_left, "Left")
 turtle.onkey(player.go_right, "Right")
 turtle.onkey(player.go_up, "Up")
 turtle.onkey(player.go_down, "Down")
+
+while True:
+    # Check if the player has reached the door
+    def check_door():
+       if player.distance(door) < 20:
+        
+            print("Congratulations! You've collected all keys and completed the maze.")
+            door_sound.play()
+        
+        #pygame.mixer.music.stop()
+       # break
+
+    # Check for interactions with obstacles
+    interact_obstacles()
+
+    # Check for power-up collection
+    collect_powerups()
+
+    collect_keys()
+    interact_with_teleports()
+    #collect_treasures()
+    check_door()
+
+    wn.update()
 
 #while True:
 def game_loop():

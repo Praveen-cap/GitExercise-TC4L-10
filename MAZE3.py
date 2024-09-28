@@ -14,8 +14,8 @@ shield_sound = pygame.mixer.Sound("shield.mp3") #sheild # Sound for shield power
 obstacle_sound = pygame.mixer.Sound("Enemy.mp3")  # Sound for collisions
 door_sound = pygame.mixer.Sound("yay.mp3")
 key_sound = pygame.mixer.Sound("fire.mp3")
-portal_sound =pygame.mixer.Sound("fire.mp3")
-treasure_sound =pygame.mixer.Sound("TREASURE.mp3")
+portal_sound =pygame.mixer.Sound("TREASURE.mp3")
+#treasure_sound =pygame.mixer.Sound("TREASURE.mp3")
 door_locked_sound=pygame.mixer.Sound("door close.mp3")
 
 # Initialize the screen
@@ -33,7 +33,7 @@ wn.register_shape("life less.gif")
 wn.register_shape("sheildd.gif")
 wn.register_shape("doorr.gif")
 wn.register_shape("KEY1 (1).gif")
-wn.register_shape("treasure.gif")
+#wn.register_shape("treasure.gif")
 wn.register_shape("random.gif")
 wn.bgpic("background3new.gif")
 wn.register_shape("heart (1).gif")
@@ -123,12 +123,12 @@ class Key(turtle.Turtle):
         self.speed(0)
 
 # Treasure class
-class Treasure(turtle.Turtle):
-    def __init__(self):
-        turtle.Turtle.__init__(self)
-        self.shape("treasure.gif")
-        self.penup()
-        self.speed(0)
+#class Treasure(turtle.Turtle):
+ #   def __init__(self):
+  #      turtle.Turtle.__init__(self)
+   #     self.shape("treasure.gif")
+    #    self.penup()
+     #   self.speed(0)
 
 # Teleport Hole class
 class TeleportHole(turtle.Turtle):
@@ -174,13 +174,17 @@ class Heart(turtle.Turtle):
             print(f"Heart lost! Remaining hearts: {self.hearts}")
             if self.hearts == 0:
                 print("Game Over!")
+                pygame.mixer.music.stop()
                 turtle.bye()  # Close the game window
+
+#class HiddenPassange(turtle.turtle):
+
 wn.update()
 # Define the third level layout
 level_3 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X   XXF   L  L  CX  F      XXXXXX",
-    "X   X   XXXXS     XX  T   XX   XX",
+    "X   XXF   L  L  CX  F       XXXXXX",
+    "X   X   XXXXS     XX      XX   XX",
     "XX     F  XXXXX     SXXX  O X XX",
     "XS  XX   XXO    XX     F    XXXXX",
     "XXX   XL  XXXX  X   XXXX   XL  XX",
@@ -195,11 +199,11 @@ level_3 = [
     "XXO  F  XX     XX   F     O  XX",
     " XX  XXX  F  XXXXXO      X   XXX",
     "X  XX  F   XXXXXX       XXXXXXXX",
-   " XXXXXOT    T   F  XXCX X K  XXX",
+   " XXXXXOT         F  XXCX X K  XXX",
     " XXL XXF      LXXXXXX    XX   XXX",
     " XXX    X  XXXF  F    F XXX   S XX",
     "XXS     XX  X    XO      C    XX",
-    "XX  X  XX  XX  XXX  X   T  XXXXX",
+    "XX  X  XX  XX  XXX  X      XXXXX",
     "XX  XK    XXXXX  XXX      XXXXXXX",
     "XXXO F   X   FF        XX  XXXXX",
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
@@ -213,7 +217,7 @@ walls = []
 obstacles = []
 powerups = []
 keys = []
-treasures = []
+#treasures = []
 teleport_holes = []
 
 def setup_maze(level):
@@ -250,10 +254,10 @@ def setup_maze(level):
                 key = Key()
                 key.goto(screen_x, screen_y)
                 keys.append(key)
-            elif character == "T":
-                treasure = Treasure()
-                treasure.goto(screen_x, screen_y)
-                treasures.append(treasure)
+            #elif character == "T":
+             #   treasure = Treasure()
+              #  treasure.goto(screen_x, screen_y)
+               # treasures.append(treasure)
             elif character == "C":
                 teleport_hole = TeleportHole()
                 teleport_hole.goto(screen_x, screen_y)
@@ -344,14 +348,14 @@ def interact_with_teleports():
        #     #player.update_status()
          #   print("You've used the teleport hole!")
 
-def collect_treasures():
-    for treasure in treasures:
-        if player.distance(treasure) < 20:  # Increase distance for collection
-            treasure.hideturtle()
-            treasures.remove(treasure)
-            treasure_sound.play()
+#def collect_treasures():
+ #   for treasure in treasures:
+  #      if player.distance(treasure) < 20:  # Increase distance for collection
+   #         treasure.hideturtle()
+    #        treasures.remove(treasure)
+     #       treasure_sound.play()
             # Add relevant logic for what happens when treasure is collected
-            print("Treasure collected!")
+      #      print("Treasure collected!")
 
 # Create instances of the classes
 pen = Pen()
@@ -372,7 +376,7 @@ status_pen.color("white")
 status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {player.shield} | Keys: {player.keys_collected}", align="center", font=("Times New Roman", 16, "bold"))
 
 # Timer settings
-game_time_limit = 60
+game_time_limit = 120
 start_time = time.time() #capture current time when the game begins.so will start from the beginning
 
 # displaying the timer
@@ -394,6 +398,7 @@ def update_timer():
     
     if remaining_time <= 0:
         print("Time's up! You didn't finish the maze in time. Game Over!")
+        pygame.mixer.music.stop()
         turtle.bye() 
     else:
         
@@ -409,14 +414,30 @@ wn.onkey(player.move_down, "Down")
 wn.onkey(player.move_left, "Left")
 wn.onkey(player.move_right, "Right")
 
-# Main game loop
+def check_door():
+    # Player can enter the door only if they have collected 3 keys
+    if player.distance(door) < 20:
+        if player.keys_collected >= 3:
+            print("Congratulations! You've collected all keys and completed the maze.")
+            door_sound.play()
+            pygame.mixer.music.stop()
+            turtle.bye()  # Close the game window
+        else:
+            print(f"You need {3 - player.keys_collected} more key(s) to open the door.")
+            door_locked_sound.play()
+
 while True:
     # Check if the player has reached the door
-    if player.distance(door) < 10:
-        door_sound.play()
-        print("You've reached the door! You win!")
-        pygame.mixer.music.stop()
-        break
+    if player.distance(door) < 20:
+        if player.keys_collected >= 3:
+            print("Congratulations! You've collected all keys and completed the maze.")
+            door_sound.play()
+        else:
+            print(f"You need {3 - player.keys_collected} more key(s) to open the door.")
+            door_locked_sound.play()
+        
+        #pygame.mixer.music.stop()
+       # break
 
     # Check for interactions with obstacles
     interact_obstacles()
@@ -425,12 +446,32 @@ while True:
     collect_powerups()
 
     collect_keys()
-    #interact_with_door()65
     interact_with_teleports()
-    collect_treasures()
+    #collect_treasures()
     check_door()
 
     wn.update()
+# Main game loop
+#while True:
+    # Check if the player has reached the door
+ #   if player.distance(door) < 10:
+  #      door_sound.play()
+   #     print("You've reached the door! You win!")
+    #    pygame.mixer.music.stop()
+     #   break
+
+    # Check for interactions with obstacles
+    #interact_obstacles()
+
+    # Check for power-up collection
+    #collect_powerups()
+
+    #collect_keys()
+    #interact_with_teleports()
+    #collect_treasures()
+    #check_door()
+
+    #wn.update()
 
 #except turtle.Terminator:  # Handles window close event
    # pygame.mixer.music.stop()  # Ensure the music stops if the window is closed

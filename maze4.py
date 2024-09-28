@@ -370,7 +370,7 @@ status_pen.write(f"Fire: {player.fire_power} | Life: {player.life} | Shield: {pl
 
 
 # Timer settings
-game_time_limit = 60
+game_time_limit = 120
 start_time = time.time() #record current time when the game begins.so will start from the beginning
 
 # displaying the timer
@@ -392,6 +392,9 @@ def update_timer():
     
     if remaining_time <= 0:
         print("Time's up! You didn't finish the maze in time. Game Over!")
+        pygame.mixer.music.stop()
+        status_pen.clear()
+        status_pen.write("Time's up! Game Over!", align="center", font=("Times New Roman", 16, "bold"))
         turtle.bye() 
     else:
         
@@ -407,20 +410,45 @@ wn.onkey(player.move_down, "Down")
 wn.onkey(player.move_left, "Left")
 wn.onkey(player.move_right, "Right")
 
-# Main game loop
+def check_door():
+    # Player can enter the door only if they have collected 3 keys
+    if player.distance(door) < 20:
+        if player.keys_collected >= 3:
+            print("Congratulations! You've collected all keys and completed the maze.")
+            door_sound.play()
+            pygame.mixer.music.stop()
+            turtle.bye()  # Close the game window
+        else:
+            print(f"You need {3 - player.keys_collected} more key(s) to open the door.")
+            door_locked_sound.play()
 while True:
+    # Check if the player has reached the door
+    if player.distance(door) < 10:
+        if player.keys_collected >= 3:
+            print("Congratulations! You've collected all keys and completed the maze.")
+            door_sound.play()
+        else:
+            print(f"You need {3 - player.keys_collected} more key(s) to open the door.")
+            door_locked_sound.play()
+        
+        #pygame.mixer.music.stop()
+       # break
+
+    # Check for interactions with obstacles
     interact_obstacles()
 
     # Check for power-up collection
     collect_powerups()
 
     collect_keys()
-    #interact_with_door()65
     interact_with_teleports()
     collect_treasures()
     check_door()
 
     wn.update()
+
+# Main game loop
+
 
     #ALL GOOD. ADD THIS TRAP SOUND THO OTHER MAZE , AND KEY SYSTEM and status to maze 3
 
