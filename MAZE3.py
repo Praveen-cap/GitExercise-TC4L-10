@@ -59,6 +59,7 @@ class Player(turtle.Turtle):
         self.life = 1
         self.shield = 0
         self.keys_collected = 0
+        self.treasures_collected = 0
 
     def move_up(self):
         new_x = self.xcor()
@@ -352,10 +353,11 @@ def collect_treasures():
         if player.distance(treasure) < 20:  # Increase distance for collection
             treasure.hideturtle()
             treasures.remove(treasure)
+            #collect_treasure_reward
 
             player.fire_power += 5
             player.life += 2
-            player.sheild += 2
+            player.shield += 2
             treasure_sound.play()
             player.update_status()
              #Add relevant logic for what happens when treasure is collected
@@ -455,30 +457,5 @@ while True:
     check_door()
 
     wn.update()
-# Main game loop
-#while True:
-    # Check if the player has reached the door
- #   if player.distance(door) < 10:
-  #      door_sound.play()
-   #     print("You've reached the door! You win!")
-    #    pygame.mixer.music.stop()
-     #   break
 
-    # Check for interactions with obstacles
-    #interact_obstacles()
-
-    # Check for power-up collection
-    #collect_powerups()
-
-    #collect_keys()
-    #interact_with_teleports()
-    #collect_treasures()
-    #check_door()
-
-    #wn.update()
-
-#except turtle.Terminator:  # Handles window close event
-   # pygame.mixer.music.stop()  # Ensure the music stops if the window is closed
-
-#background small .key n portal not working .the sound effect not working.
-#when i go door without key .the game is ending , status bar kolar
+#status bar kolar
