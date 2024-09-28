@@ -3,7 +3,6 @@ import math
 import os
 import pygame
 from puzzle import PuzzleGame  
-
 pygame.mixer.init()
 
 
