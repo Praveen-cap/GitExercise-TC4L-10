@@ -95,14 +95,14 @@ class Player(turtle.Turtle):
                 self.hit_by_wall()
 
     def hit_by_wall(self):
-        self.lives -= 1
-        print(f"You hit a wall! Lives left: {self.lives}")
+        heart_display.decrease_heart()
+        print(f"You hit a wall! ")
 
-        if self.lives > 0:
-            self.goto(start_position)
-        else:
-            print("Game Over! You lost all your lives.")
-            turtle.bye()
+        #if self.lives > 0:
+         #   self.goto(start_position)
+        #else:
+         #   print("Game Over! You lost all your lives.")
+          #  turtle.bye()
 
 levels = [""]
 

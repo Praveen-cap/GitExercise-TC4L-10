@@ -82,7 +82,50 @@ class Player(turtle.Turtle):
     def update_status(self):
         status_pen.clear()
         status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield}", align="center", font=("Courier", 16, "normal"))
+    def hit_by_wall(self):
+        self.lives -= 1
+        print(f"You hit a wall! Lives left: {self.lives}")
 
+        if self.lives > 0:
+            self.goto(-320, 320)
+        else:
+            print("Game Over! You lost all your lives.")
+            turtle.bye()
+
+class MovingBrick(turtle.Turtle):
+    def __init__(self, start_pos, move_distance, player):
+        turtle.Turtle.__init__(self)
+        self.shape("brick.gif")
+        self.color("white")
+        self.penup()
+        self.speed(0)
+        self.start_pos = start_pos
+        self.move_distance = move_distance / 2
+        self.direction = 1  # 1 means moving up, -1 means moving down
+        self.goto(start_pos)
+        self.stamp()
+        self.player= player 
+        self.move_timer =0
+
+    def move(self):
+      self.clear()
+      new_y = self.ycor() + (self.move_distance * self.direction)
+      self.goto(self.xcor(), new_y)
+      self.direction *= -1  # Reverse the direction for the next move
+      self.stamp()
+
+      if new_y > self.start_pos[1] + self.move_distance:
+        self.direction = -1
+      elif new_y < self.start_pos[1] - self.move_distance:
+        self.direction = 1 
+
+        self.move_timer = 0  # Reset the move timer
+
+    def update(self):
+        self.move_timer += 1
+        if self.move_timer >= 10:  # Move every 10 frames
+            self.move()
+            self.move_timer = 0
 # Door class to represent the exit
 class Door(turtle.Turtle):
     def __init__(self):
@@ -154,28 +197,28 @@ wn.update()
 level_2 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXX",
     "X  XXXF      OXXXF       X",
-    "X  XX   XXXXS XX  XX  XXXX",
-    "X   F  XXXXX     SXXX OXXX",
+    "X  MX   MXXXS XX  XX  XXXX",
+    "X   F  XXXXM     SXXX OXXX",
     "XS  XX  XXXO    XX     FXX",
     "XXX XXL XXXX  X   XXXX  XX",
-    "XX  XX  X    XXX   XXX  XX",
+    "XX  XX  MX   XXX   XXX  XX",
     "XXXS  XXX  XXXXXX  XX  XXX",
-    "XXX  O  F  XXXXXX    S   X",
-    "XXXXXXXXXXXXX   XX   XXX X",
-    "XXX LXXX   X  F   XX   XXX",
-    "XXX   F     X  XXXXXX  OXX",
-    "XXXXX  XXXXX XXXX     L XX",
-    "XXXXX  XXX   FF F F     XX",
+    "XXX  O  F  XXXXXX   MS   X",
+    "XXXXXXXXXMMXX   XX   XXX X",
+    "XXX LXXX  MX  F   XX  MXXX",
+    "XXX   F    MX  XXXXXX  OXX",
+    "XXXXX  XXXXX XXXX   M L XX",
+    "XXXXX  XXX   FM F F     XX",
     "XXO  F  XX     XX   F  OXX",
     "XX  XXX  F  XXXXXO    XXXX",
-    "X  XX  F   XXXXXX    XXXXX",
-    "X  XXXXXO         F  XXCXX",
+    "X  XX  F   XXXXXXM  MXXXXX",
+    "X  XXXXXO      M  F  XXCXX",
     "XX  XXF      LXXXXXX    XX",
-    "XX  XX  XXXXXXXXXXX   SXXX",
+    "XX  XX  MXXXXXXXXXX   SXXX",
     "XXS XX   YX  XXO      XXXX",
     "XX  XX  XX  XX  XXX  XXXXX",
     "XX  XX   XXXXX  XXX  XXXXX",
-    "XXXO F   X   FF XXXXXXXXXX",
+    "XXXO F MMX   FF XXXXXXXXXX",
     "XXXXXXXXXXXXXXXXXXXXXXXXXX"
 ]
 
@@ -186,7 +229,7 @@ powerups = []
 keys = []
 treasures = []
 teleport_holes = []
-
+moving_bricks = []
 # Setup maze on the screen
 def setup_maze(level):
     wn.tracer(0)  # Turn off screen updates
@@ -247,7 +290,15 @@ def collect_powerups():
                 life_sound.play()
             player.update_status()
             print(f"{powerup.power_type.capitalize()} power-up collected!")
-
+def interact_moving_bricks():
+    for brick in moving_bricks:
+        if player.distance(brick) < 12:
+            player.goto(-320, 320)
+           #heart_display.decrease_heart()
+            print("You hit a moving brick! Going back to start.")
+def quit_game():
+    print("Game over! Quitting...")
+    turtle.bye()
 # Create instances of the classes
 pen = Pen()
 player = Player()
@@ -305,27 +356,30 @@ wn.onkey(player.move_down, "Down")
 wn.onkey(player.move_left, "Left")
 wn.onkey(player.move_right, "Right")
 
-# Main game loop
-while True:
+
+def game_loop():
     # Check if the player has reached the door
     if player.distance(door) < 10:
         door_sound.play()
         print("You've reached the door! You win!")
         pygame.mixer.music.stop()
-        break
+        turtle.bye()
+        return
 
     # Check for interactions with obstacles
     interact_obstacles()
 
+    # Check for interactions with moving bricks
+    interact_moving_bricks()
+    
+    for brick in moving_bricks:
+        brick.update()
     # Check for power-up collection
     collect_powerups()
 
     wn.update()
+    wn.ontimer(game_loop, 100)  # Repeat the game loop every 100 ms
 
-    
-
-#except turtle.Terminator:  # Handles window close event
-   # pygame.mixer.music.stop()  # Ensure the music stops if the window is closed
-
-
-#heart not working
+# Start the game loop
+game_loop()
+turtle.done()
