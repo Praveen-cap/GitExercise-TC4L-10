@@ -2,7 +2,11 @@ import turtle
 import random
 import pygame
 import time
+import os
 pygame.mixer.init()
+
+os.chdir(r"C:\Users\acsia\Mini It Project\GitExercise-TC4L-10\MAZE 1234" )
+
 
 # Load background music and sound effects (MP3 format)
 pygame.mixer.music.load("background 3.mp3")  # Background music
@@ -21,7 +25,7 @@ door_locked_sound=pygame.mixer.Sound("door close.mp3")
 wn = turtle.Screen()
 wn.bgcolor("black")
 wn.title("INFINITE MAZE")
-wn.setup(800, 600)
+wn.setup(900, 700)
 
 # Register shapes
 wn.register_shape("brick4.gif")
@@ -31,6 +35,13 @@ wn.register_shape("fire new2.gif")
 wn.register_shape("life less.gif")
 wn.register_shape("sheildd.gif")
 wn.register_shape("doorr.gif")
+wn.register_shape("character2.gif")
+wn.register_shape("Monster 2.1.gif")
+wn.register_shape("Monster 2.2.gif")
+wn.register_shape("Monster 2.3.gif")
+wn.register_shape("Monster 2.4.gif")
+wn.register_shape("Monster 2.5.gif")
+wn.register_shape("Monster 2.6.gif")
 wn.register_shape("KEY1 (1).gif")
 wn.register_shape("treasure.gif")
 wn.register_shape("random.gif")
@@ -45,7 +56,7 @@ wn.register_shape("standing.gif")
 # Pen class for drawing the walls
 class Pen(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("brick4.gif")
         self.penup()
         self.speed(0)
@@ -102,13 +113,26 @@ class Player(turtle.Turtle):
         status_pen.clear()
         status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Courier", 16, "normal"))
 
+class Monster(turtle.Turtle):
+    def __init__(self):
+        super().__init__()
+        self.frames = ["Monster 2.1.gif", "Monster 2.2.gif", "Monster 2.3.gif", "Monster 2.4.gif", "Monster 2.5.gif", "Monster 2.6.gif"]
+        self.frame_index = 0
+        self.shape(self.frames[self.frame_index])
+        self.penup()
+        self.speed(0)
+        self.goto(-135, -255)
 
+    def animate(self):
+        self.frame_index = (self.frame_index + 1) % len(self.frames)
+        self.shape(self.frames[self.frame_index])
+        turtle.ontimer(self.animate, 200)
 
 
 # Door class to represent the exit
 class Door(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("doorr.gif")
         self.penup()
         self.speed(0)
@@ -117,7 +141,7 @@ class Door(turtle.Turtle):
 # PowerUp class for power-up items (Fire, Life Potion, Shield)
 class PowerUp(turtle.Turtle):
     def __init__(self, shape, power_type):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape(shape)
         self.penup()
         self.speed(0)
@@ -126,7 +150,7 @@ class PowerUp(turtle.Turtle):
 # Obstacle class
 class Obstacle(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("trap ori.gif")
         self.penup()
         self.speed(0)
@@ -134,7 +158,7 @@ class Obstacle(turtle.Turtle):
 # Key class
 class Key(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("KEY1 (1).gif")
         self.penup()
         self.speed(0)
@@ -142,7 +166,7 @@ class Key(turtle.Turtle):
 # Treasure class
 class Treasure(turtle.Turtle):
     def ___init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("treasure.gif")
         self.penup()
         self.speed(0)
@@ -150,14 +174,14 @@ class Treasure(turtle.Turtle):
 # Teleport Hole class
 class TeleportHole(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("random.gif")
         self.penup()
         self.speed(0)
 
 class Heart(turtle.Turtle):
     def __init__(self):
-        turtle.Turtle.__init__(self)
+        super().__init__(self)
         self.shape("heart (1).gif")  # Heart image
         self.penup()
         self.hideturtle()  # Hide this main instance to avoid displaying an unwanted heart
@@ -193,7 +217,7 @@ class Heart(turtle.Turtle):
             if self.hearts == 0:
                 print("Game Over!")
                 turtle.bye()  # Close the game window
-wn.update()
+
 # Define the third level layout
 level_3 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
@@ -275,7 +299,7 @@ def setup_maze(level):
                 teleport_hole = TeleportHole()
                 teleport_hole.goto(screen_x, screen_y)
                 teleport_holes.append(teleport_hole)
-    wn.update()
+
 
 def interact_obstacles():
     for obstacle in obstacles:

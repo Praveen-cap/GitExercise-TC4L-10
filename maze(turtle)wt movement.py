@@ -2,6 +2,9 @@ import turtle
 import pygame
 import sys
 import time
+import os
+
+os.chdir(r"C:\Users\acsia\Mini It Project\GitExercise-TC4L-10\MAZE 1234")
 
 pygame.mixer.init()
 
