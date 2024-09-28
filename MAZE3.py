@@ -15,7 +15,7 @@ obstacle_sound = pygame.mixer.Sound("Enemy.mp3")  # Sound for collisions
 door_sound = pygame.mixer.Sound("yay.mp3")
 key_sound = pygame.mixer.Sound("fire.mp3")
 portal_sound =pygame.mixer.Sound("TREASURE.mp3")
-#treasure_sound =pygame.mixer.Sound("TREASURE.mp3")
+treasure_sound =pygame.mixer.Sound("TREASURE.mp3")
 door_locked_sound=pygame.mixer.Sound("door close.mp3")
 
 # Initialize the screen
@@ -33,7 +33,7 @@ wn.register_shape("life less.gif")
 wn.register_shape("sheildd.gif")
 wn.register_shape("doorr.gif")
 wn.register_shape("KEY1 (1).gif")
-#wn.register_shape("treasure.gif")
+wn.register_shape("treasure.gif")
 wn.register_shape("random.gif")
 wn.bgpic("background3new.gif")
 wn.register_shape("heart (1).gif")
@@ -86,7 +86,7 @@ class Player(turtle.Turtle):
 
     def update_status(self):
         status_pen.clear()
-        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Courier", 16, "normal"))
+        status_pen.write(f"Fire: {self.fire_power} | Life: {self.life} | Shield: {self.shield} | Keys: {self.keys_collected}", align="center", font=("Times New Roman", 16, "bold"))
 
 # Door class to represent the exit
 class Door(turtle.Turtle):
@@ -122,13 +122,12 @@ class Key(turtle.Turtle):
         self.penup()
         self.speed(0)
 
-# Treasure class
-#class Treasure(turtle.Turtle):
- #   def __init__(self):
-  #      turtle.Turtle.__init__(self)
-   #     self.shape("treasure.gif")
-    #    self.penup()
-     #   self.speed(0)
+class Treasure(turtle.Turtle):
+    def __init__(self):
+        turtle.Turtle.__init__(self)
+        self.shape("treasure.gif")
+        self.penup()
+        self.speed(0)
 
 # Teleport Hole class
 class TeleportHole(turtle.Turtle):
@@ -183,7 +182,7 @@ wn.update()
 # Define the third level layout
 level_3 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X   XXF   L  L  CX  F       XXXXXX",
+    "X   XXF   L  L  CX  F    T  XXXXXX",
     "X   X   XXXXS     XX      XX   XX",
     "XX     F  XXXXX     SXXX  O X XX",
     "XS  XX   XXO    XX     F    XXXXX",
@@ -217,7 +216,7 @@ walls = []
 obstacles = []
 powerups = []
 keys = []
-#treasures = []
+treasures = []
 teleport_holes = []
 
 def setup_maze(level):
@@ -254,10 +253,10 @@ def setup_maze(level):
                 key = Key()
                 key.goto(screen_x, screen_y)
                 keys.append(key)
-            #elif character == "T":
-             #   treasure = Treasure()
-              #  treasure.goto(screen_x, screen_y)
-               # treasures.append(treasure)
+            elif character == "T":
+                treasure = Treasure()
+                treasure.goto(screen_x, screen_y)
+                treasures.append(treasure)
             elif character == "C":
                 teleport_hole = TeleportHole()
                 teleport_hole.goto(screen_x, screen_y)
@@ -348,14 +347,19 @@ def interact_with_teleports():
        #     #player.update_status()
          #   print("You've used the teleport hole!")
 
-#def collect_treasures():
- #   for treasure in treasures:
-  #      if player.distance(treasure) < 20:  # Increase distance for collection
-   #         treasure.hideturtle()
-    #        treasures.remove(treasure)
-     #       treasure_sound.play()
-            # Add relevant logic for what happens when treasure is collected
-      #      print("Treasure collected!")
+def collect_treasures():
+    for treasure in treasures:
+        if player.distance(treasure) < 20:  # Increase distance for collection
+            treasure.hideturtle()
+            treasures.remove(treasure)
+
+            player.fire_power += 5
+            player.life += 2
+            player.sheild += 2
+            treasure_sound.play()
+            player.update_status()
+             #Add relevant logic for what happens when treasure is collected
+            print("Treasure collected!")
 
 # Create instances of the classes
 pen = Pen()
@@ -447,7 +451,7 @@ while True:
 
     collect_keys()
     interact_with_teleports()
-    #collect_treasures()
+    collect_treasures()
     check_door()
 
     wn.update()
