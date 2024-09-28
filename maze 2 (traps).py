@@ -1,5 +1,7 @@
 import turtle
+import os 
 
+os.chdir(r"C:\Users\Dell\Mini IT Project\GitExercise-TC4L-10\Kj")
 # Setup the screen
 wn = turtle.Screen()
 wn.bgcolor("black")
