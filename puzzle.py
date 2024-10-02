@@ -14,6 +14,8 @@ class PuzzleGame:
         self.GREEN = (0, 255, 0)
         self.RED = (255, 0, 0)
 
+        self.solved = False
+
         self.image = pygame.image.load(image_path)
         self.image = pygame.transform.scale(self.image, (self.WIN_WIDTH, self.WIN_HEIGHT))
 
@@ -33,14 +35,14 @@ class PuzzleGame:
         self.start_time = time.time()
 
     def create_tiles(self):
-        scale_factor = 2
-        tile_width = self.TILE_SIZE // scale_factor
-        tile_height = self.TILE_SIZE // scale_factor
+        if self.image.get_width() < self.WIN_WIDTH or self.image.get_height() < self.WIN_HEIGHT:
+            print("Error: Image is too small to create tiles.")
+            return
 
         for row in range(self.ROWS):
             row_tiles = []
             for col in range(self.COLS):
-                tile = pygame.transform.scale(self.image.subsurface(col * self.TILE_SIZE, row * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE), (self.TILE_SIZE, self.TILE_SIZE))
+                tile = self.image.subsurface(col * self.TILE_SIZE, row * self.TILE_SIZE, self.TILE_SIZE, self.TILE_SIZE)
                 row_tiles.append(tile)
                 self.rotations.append(0)  # No rotation initially
 
@@ -48,7 +50,8 @@ class PuzzleGame:
 
     def randomize_rotations(self):
         for i in range(self.ROWS * self.COLS):
-            self.rotations[i] = random.choice([0, 90, 180, 270])
+            if self.rotations[i] == 0:
+                self.rotations[i] = random.choice([0, 90, 180, 270])
 
     def rotate_tile(self, i):
         self.rotations[i] = (self.rotations[i] + 90) % 360
@@ -61,7 +64,8 @@ class PuzzleGame:
         for i in range(self.ROWS * self.COLS):
             row, col = i // self.COLS, i % self.COLS
             rotated_tile = pygame.transform.rotate(self.tiles[row][col], self.rotations[i])
-            self.win.blit(rotated_tile, (col * self.TILE_SIZE, row * self.TILE_SIZE))
+            rect = rotated_tile.get_rect(center=(col * self.TILE_SIZE + self.TILE_SIZE // 2, row * self.TILE_SIZE + self.TILE_SIZE // 2))
+            self.win.blit(rotated_tile, rect)
 
         # Display timer
         self.draw_timer()
@@ -96,6 +100,7 @@ class PuzzleGame:
 
     def main(self):
         run = True
+        clock = pygame.time.Clock()
         while run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -103,29 +108,29 @@ class PuzzleGame:
 
                 if event.type == pygame.MOUSEBUTTONDOWN and not self.is_solved():
                     self.handle_mouse_click(event.pos)
+                    self.draw_puzzle()
 
             self.draw_puzzle()
 
-            # If the puzzle is solved, display the solved message
+            # If the puzzle is solved, display the solved message and quit
             if self.is_solved():
                 self.draw_solved_message()
-
-            # If time runs out, show "Time's Up" message and exit
-            if time.time() - self.start_time >= self.time_limit:
-                self.draw_time_up_message()
-                pygame.time.wait(2000)  # Wait 2 seconds before quitting
-                self.return_to_start_point()  # Return to the starting point in the maze
+                pygame.time.wait(1000)
+                self.solved = True  # Set solved to True
                 run = False
 
+            if time.time() - self.start_time >= self.time_limit:
+                self.draw_time_up_message()
+                pygame.time.wait(2000)
+                run = False
+
+            clock.tick(60)
+        
         pygame.quit()
 
-    def return_to_start_point(self):
-        # Logic to return the player to the maze's starting point
-        print("Returning player to the maze's starting point...")
-
-        # Add the actual code here that would move the player back to the starting point
-        # This might involve communicating with the main maze game logic
+    def was_solved(self):
+        return self.solved
 
 if __name__ == "__main__":
-    game = PuzzleGame("dragon vettai ku whistle podu .jpg")  # Replace with your image path
+    game = PuzzleGame("dragon.jpg")  # Replace with the actual image path
     game.main()
