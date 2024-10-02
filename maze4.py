@@ -179,28 +179,28 @@ wn.update()
 # Define the third level layout
 level_4 = [
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "X   XXF   L  L  CX  F      XXXXXX",
-    "X   X   XXXXS     XX  T   XX   XX",
-    "XX     F  XXXXX     SXXX  O X XX",
-    "XS  XX   XXO    XX     F    XXXXX",
-    "XXX   XL  XXXX  X   XXXX   XL  XX",
-    "XX            XXX   XXX   XK  OXX",
- " XXXS  XXX  XXXXXX       XX FXXX",
+    "X   XXF   L  L  CX  F      XXXXX",
+    "X   X   XXXXS     XX  T   XX  XX",
+    "XX     F  XXXXX     SXXX  O XXXX",
+    "XS  XX   XXO    XX     F    XXXX",
+    "XXX   XL  XXXX  X   XXXX   XL XX",
+    "XX            XXX   XXX   XK  OX",
+    "XXXS  XXX  XXXXXX       XX  FXXX",
     "XXX  O  F  XXXXX     S  XXX   XX",
     "XXX       XXXXX  XXX   XXX L  XX",
-    "XXX LXXX      F   XX       O  XXX",
-    " XXXX   F   XXXXXXXX  F F     XXX",
+    "XXX LXXX      F   XX       O XXX",
+    "XXXX   F   XXXXXXXX  F F   F XXX",
     "XK     XXXXXX   YXXXX     L  XXX",
     "XXX    XXX     FXXF          XXX",
-    "XXO  F  XX     XX   F     O  XX",
-    " XX  XXX  F  XXXXXO      X   XXX",
+    "XXO  F  XX     XX   F     O   XX",
+    "XX  XXX  F  XXXXXO      X   XXXX",
     "X  XX  F   XXXXXX       XXXXXXXX",
-   " XXXXXOT    T   F  XXCX    K  XXX",
-    " XXL XXF      LXXXXXX    XX   XXX",
-    " XXX    X  XXXF  F    F XXX   S XX",
-    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-    "XX  XK    XXXXX  XXX      XXXXXXX",
-    "XXXO F   X   FF        XX  XXXXX",
+    "XXXXXOT    T   F  XXCX    K  XXX",
+    "XXL XXF      LXXXXXX    XX   XXX",
+    "XXX    X  XXXF  F    F XXX   XXX",
+    "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "XX  XK    XXXXX  XXX      XXXXXX",
+    "XXXO F   X   FF      F      XXXX",
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 ]
 
@@ -453,4 +453,3 @@ while True:
 
 
     #ALL GOOD. ADD THIS TRAP SOUND THO OTHER MAZE , AND KEY SYSTEM and status to maze 3
-
